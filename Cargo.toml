@@ -1,0 +1,7 @@
+[workspace]
+members = [
+  "rocal_macro",
+  "rocal_core",
+  "rocal_macro_usage",
+  "rocal"
+]

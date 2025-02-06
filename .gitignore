@@ -1,0 +1,14 @@
+/target
+/rocal_macro_usage
+
+/rocal/target
+/rocal_core/target
+/rocal_macro/target
+
+/rocal/.git
+/rocal_core/.git
+/rocal_macro/.git
+
+/rocal/.gitignore
+/rocal_core/.gitignore
+/rocal_macro/.gitignore

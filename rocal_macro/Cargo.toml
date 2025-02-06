@@ -1,0 +1,13 @@
+[package]
+name = "rocal_macro"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+quote = "1.0"
+syn = { version = "2.0", features = ["extra-traits"] }
+proc-macro2 = "1.0"
+rocal_core = { path = "../rocal_core" }
+
+[lib]
+proc-macro = true

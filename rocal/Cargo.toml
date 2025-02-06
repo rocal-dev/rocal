@@ -1,0 +1,8 @@
+[package]
+name = "rocal"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rocal_macro = { path = "../rocal_macro" }
+rocal_core = { path = "../rocal_core" }
