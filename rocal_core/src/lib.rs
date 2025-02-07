@@ -1,6 +1,7 @@
 use configuration::{build_config_struct, parse_config};
 use database::build_database_struct;
 use enums::request_method::RequestMethod;
+use migrator::get_migrations;
 use parsed_action::parse_action;
 use parsed_route::parse_routes;
 use proc_macro2::{Span, TokenStream};
@@ -12,6 +13,7 @@ use workers::db_sync_worker::build_db_sync_worker_struct;
 mod configuration;
 mod database;
 pub mod enums;
+mod migrator;
 mod parsed_action;
 mod parsed_route;
 pub mod route_handler;
@@ -29,6 +31,7 @@ pub fn start_app(item: TokenStream) -> TokenStream {
 
     quote! {
         use wasm_bindgen::prelude::*;
+        use rocal::rocal_core::traits::{Controller, View};
 
         #[wasm_bindgen]
         extern "C" {
@@ -45,11 +48,6 @@ pub fn start_app(item: TokenStream) -> TokenStream {
                 crate::ForceType::None
             );
             db_sync_worker.run();
-
-            // match CONFIG.get_database().apply_migrations().await {
-            //     Ok(_) => (),
-            //     Err(err) => web_sys::console::error_1(&err),
-            // }
         }
 
         #database_struct
@@ -92,8 +90,6 @@ pub fn build_route(item: TokenStream) -> TokenStream {
         );
 
         quote! {
-            use rocal::rocal_core::traits::{Controller, View};
-
             let #ctrl = std::rc::Rc::new(crate::controllers::#controller_mod_name::#controller::new(
                 router.clone(),
                 crate::views::#view_mod_name::#view::new(router.clone()),
@@ -248,6 +244,20 @@ pub fn build_action(item: TokenStream) -> TokenStream {
             #(#build_args)*
 
             #(#stmts)*
+        }
+    }
+}
+
+pub fn run_migration(item: TokenStream) -> TokenStream {
+    let query = match get_migrations(&item) {
+        Ok(query) => query,
+        Err(err) => return err.to_compile_error().into(),
+    };
+
+    quote! {
+        match CONFIG.get_database().exec(#query).await {
+            Ok(_) => (),
+            Err(err) => web_sys::console::error_1(&err),
         }
     }
 }

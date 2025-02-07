@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use rocal_core::{build_action, build_config, build_route, start_app};
+use rocal_core::{build_action, build_config, build_route, run_migration, start_app};
 
 #[proc_macro_attribute]
 pub fn main(_: TokenStream, item: TokenStream) -> TokenStream {
@@ -19,4 +19,9 @@ pub fn route(item: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn config(item: TokenStream) -> TokenStream {
     build_config(item.into()).into()
+}
+
+#[proc_macro]
+pub fn migrate(item: TokenStream) -> TokenStream {
+    run_migration(item.into()).into()
 }
