@@ -1,4 +1,3 @@
-use proc_macro2::TokenStream;
 use syn::{
     FnArg, GenericArgument, Ident, ItemFn, Pat, PatIdent, PatType, PathArguments, Type, TypePath,
 };
@@ -31,14 +30,6 @@ pub struct Arg {
 }
 
 impl Arg {
-    pub fn new(name: Ident, ty: Ident, is_optional: bool) -> Self {
-        Arg {
-            name,
-            ty,
-            is_optional,
-        }
-    }
-
     pub fn get_name(&self) -> &Ident {
         &self.name
     }
@@ -53,8 +44,6 @@ impl Arg {
 }
 
 pub fn parse_action(ast: &ItemFn) -> Result<ParsedAction, syn::Error> {
-    //    let ast: ItemFn = syn::parse2(item).unwrap();
-
     let fn_name = ast.sig.ident.clone();
     let args = extract_args(ast);
 

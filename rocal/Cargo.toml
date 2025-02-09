@@ -4,5 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rocal_macro = { path = "../rocal_macro" }
-rocal_core = { path = "../rocal_core" }
+rocal-macro = "0.1.0"
+rocal-core = "0.1.0"
+rocal-cli = "0.1.0"
+
+[lib]
+name = "rocal"
+path = "src/lib.rs"
+
+[[bin]]
+name = "rocal"
+path = "src/main.rs"

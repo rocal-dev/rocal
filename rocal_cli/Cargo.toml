@@ -1,0 +1,17 @@
+[package]
+name = "rocal-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+quote = "1.0"
+syn = { version = "2.0", features = ["extra-traits"] }
+clap = { version = "4.5.28", features = ["cargo"] }
+
+[dependencies.uuid]
+version = "1.13.1"
+features = [
+    "v4",                
+    "fast-rng",          
+    "macro-diagnostics",
+]

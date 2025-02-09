@@ -1,5 +1,5 @@
 [package]
-name = "rocal_macro"
+name = "rocal-macro"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,7 @@ edition = "2021"
 quote = "1.0"
 syn = { version = "2.0", features = ["extra-traits"] }
 proc-macro2 = "1.0"
-rocal_core = { path = "../rocal_core" }
+rocal-core = "0.1.0"
 
 [lib]
 proc-macro = true

@@ -1,7 +1,15 @@
 [workspace]
+resolver = "2"
 members = [
   "rocal_macro",
   "rocal_core",
   "rocal_macro_usage",
-  "rocal"
+  "rocal",
+  "rocal_cli"
 ]
+
+[patch.crates-io]
+rocal = { path = "rocal" }
+rocal-cli = { path = "rocal_cli" }
+rocal-core = { path = "rocal_core" }
+rocal-macro = { path = "rocal_macro" }
