@@ -1,7 +1,6 @@
 const version = "v1";
 const assets = [
     "./",
-    "./favicon.ico",
     "./index.html",
     "./js/db_query_worker.js",
     "./js/db_sync_worker.js",
@@ -9,8 +8,6 @@ const assets = [
     "./js/sqlite3-opfs-async-proxy.js",
     "./js/sqlite3.mjs",
     "./js/sqlite3.wasm",
-    "./pkg/rust_router.js",
-    "./pkg/rust_router_bg.wasm",
 ];
 
 self.addEventListener('install', (e) => {

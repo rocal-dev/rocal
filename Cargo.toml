@@ -10,6 +10,6 @@ members = [
 
 [patch.crates-io]
 rocal = { path = "rocal" }
-rocal-cli = { path = "rocal_cli" }
+rocal-cli = { path = "rocal_cli", optional = true }
 rocal-core = { path = "rocal_core" }
 rocal-macro = { path = "rocal_macro" }

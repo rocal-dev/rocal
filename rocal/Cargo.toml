@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 rocal-macro = "0.1.0"
 rocal-core = "0.1.0"
-rocal-cli = "0.1.0"
+rocal-cli = { version = "0.1.0", optional = true }
 
 [lib]
 name = "rocal"
@@ -15,3 +15,8 @@ path = "src/lib.rs"
 [[bin]]
 name = "rocal"
 path = "src/main.rs"
+required-features = ["cli"]
+
+[features]
+cli = ["rocal-cli"]
+default = []
