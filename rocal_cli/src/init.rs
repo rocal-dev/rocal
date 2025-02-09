@@ -9,6 +9,8 @@ use crate::generators::{
 };
 
 pub fn init(project_name: &str) {
+    println!("Initializing...");
+
     let output = Command::new("cargo")
         .arg("init")
         .arg("--lib")
@@ -23,20 +25,39 @@ pub fn init(project_name: &str) {
         ));
 
         create_cargo_file(project_name);
+        println!("Created Cargo.toml");
+
         create_lib_file();
+        println!("Created lib.rs");
+
         create_template_file();
+        println!("Created (a) template file(s)");
+
         create_view_file();
+        println!("Created (a) view file(s)");
+
         create_controller_file();
+        println!("Created (a) controller file(s)");
+
         create_model_file();
+        println!("Created models/ directory");
+
         create_migration_dir();
+        println!("Created db/migration directory");
+
         create_js_files();
+        println!("Created js files");
+
         create_entrypoint(project_name);
+        println!("Created index.html");
 
         Command::new("cargo")
             .arg("fmt")
             .arg("--all")
             .output()
             .expect("Failed to format Rust code");
+
+        println!("Done.");
     } else {
         eprintln!(
             "cargo init failed: {}",
