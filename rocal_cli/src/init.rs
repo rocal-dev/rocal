@@ -31,6 +31,12 @@ pub fn init(project_name: &str) {
         create_migration_dir();
         create_js_files();
         create_entrypoint(project_name);
+
+        Command::new("cargo")
+            .arg("fmt")
+            .arg("--all")
+            .output()
+            .expect("Failed to format Rust code");
     } else {
         eprintln!(
             "cargo init failed: {}",

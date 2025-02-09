@@ -1,14 +1,24 @@
 use std::{fs, path::PathBuf};
 
-use super::absolute_path;
+macro_rules! copy_files {
+    ( $( $filename:literal ),* $(,)? ) => {{
+        $(
+            let src_file = include_bytes!(concat!("../../js/", $filename));
+            let dst_file = std::path::PathBuf::from(&format!("js/{}", $filename));
+            std::fs::write(&dst_file, src_file).expect(&format!("Failed to copy {}", $filename));
+        )*
+
+    }};
+}
 
 pub fn create_js_files() {
-    let src_sw_file = absolute_path("js/sw.js");
+    let src_sw_file = include_bytes!("../../js/sw.js");
     let dst_sw_file = PathBuf::from("sw.js");
-    fs::copy(&src_sw_file, &dst_sw_file).expect("Failed to copy js/sw.js");
+    fs::write(&dst_sw_file, src_sw_file).expect("Failed to copy js/sw.js");
 
     fs::create_dir_all("js").expect("Failed to create js/");
-    let src_files = vec![
+
+    copy_files![
         "db_query_worker.js",
         "db_sync_worker.js",
         "global.js",
@@ -16,10 +26,4 @@ pub fn create_js_files() {
         "sqlite3.mjs",
         "sqlite3.wasm",
     ];
-
-    src_files.iter().for_each(|src| {
-        let src_file = absolute_path(&format!("js/{}", src));
-        let dst_file = PathBuf::from(&format!("js/{}", src));
-        fs::copy(&src_file, &dst_file).expect(&format!("Failed to copy {}", src));
-    });
 }
