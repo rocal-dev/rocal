@@ -1,6 +1,13 @@
 /target
 /rocal_macro_usage
 
+/rocal_core/Cargo.lock
+/rocal_macro/Cargo.lock
+
+/rocal_core/target
+/rocal_macro/target
+/examples/hello_world/target
+
 /rocal/target
 /rocal_core/target
 /rocal_macro/target
