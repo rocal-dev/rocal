@@ -1,10 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
+  "rocal",
   "rocal_macro",
   "rocal_core",
-  "rocal_macro_usage",
-  "rocal",
   "rocal_cli"
 ]
 

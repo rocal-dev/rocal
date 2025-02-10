@@ -4,6 +4,7 @@
 /rocal/target
 /rocal_core/target
 /rocal_macro/target
+/examples/hello_world/target
 
 /rocal/.git
 /rocal_core/.git
@@ -12,3 +13,4 @@
 /rocal/.gitignore
 /rocal_core/.gitignore
 /rocal_macro/.gitignore
+/examples/hello_world/.gitignore

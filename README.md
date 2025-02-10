@@ -51,6 +51,15 @@ Other than the macros, there is an essential struct to communicate with an embed
 You could write like below to execute queries to the database.
 
 ```rust
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct User {
+  id: u32,
+  first_name: String,
+  last_name: String,
+}
+
 let database = crate::CONFIG.get_database().clone();
 
 let result: Result<Vec<User>, JsValue> = database.query("select id, first_name, last_name from users;").await;

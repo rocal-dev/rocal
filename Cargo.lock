@@ -475,20 +475,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rocal_macro_usage"
-version = "0.1.0"
-dependencies = [
- "js-sys",
- "rocal",
- "serde",
- "serde-wasm-bindgen",
- "url",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
-
-[[package]]
 name = "rustversion"
 version = "1.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"

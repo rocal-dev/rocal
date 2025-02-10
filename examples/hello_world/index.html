@@ -1,0 +1,27 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>hello_world</title>
+</head>
+<body>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.register('./sw.js');
+          }
+      });
+    </script>
+    <script src="./js/global.js"></script>
+    <script type="module">
+      import init from './pkg/hello_world.js';
+
+      async function main() {
+          const wasm = await init();
+      }
+
+      main();
+    </script>
+</body>
+</html>
