@@ -1,4 +1,4 @@
-#![doc = include_str!("../../README.md")]
+#![doc = include_str!("../README.md")]
 
 use proc_macro::TokenStream;
 use rocal_core::{build_action, build_config, build_route, run_migration, start_app};

@@ -8,6 +8,7 @@ description = "CLI tool for local-first-development driven web application frame
 license = "MIT"
 homepage = "https://github.com/rocal-dev/rocal"
 repository = "https://github.com/rocal-dev/rocal"
+readme = "README.md"
 keywords = ["local-first-development", "local-first", "web-framework"]
 
 [dependencies]
