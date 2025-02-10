@@ -1,3 +1,5 @@
+#![doc = include_str!("../../README.md")]
+
 pub use rocal_core;
 pub use rocal_macro::action;
 pub use rocal_macro::config;

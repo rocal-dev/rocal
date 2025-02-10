@@ -1,3 +1,5 @@
+#![doc = include_str!("../../README.md")]
+
 use configuration::{build_config_struct, parse_config};
 use database::build_database_struct;
 use enums::request_method::RequestMethod;

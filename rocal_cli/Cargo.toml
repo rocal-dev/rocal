@@ -3,6 +3,13 @@ name = "rocal-cli"
 version = "0.1.0"
 edition = "2021"
 
+authors = ["Yoshiki Sashiyama <yoshi@rocal.dev>"]
+description = "CLI tool for local-first-development driven web application framework"
+license = "MIT"
+homepage = "https://github.com/rocal-dev/rocal"
+repository = "https://github.com/rocal-dev/rocal"
+keywords = ["local-first-development", "local-first", "web-framework"]
+
 [dependencies]
 quote = "1.0"
 syn = { version = "2.0", features = ["extra-traits"] }
