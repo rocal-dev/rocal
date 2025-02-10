@@ -430,7 +430,7 @@ checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
 
 [[package]]
 name = "rocal"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rocal-cli",
  "rocal-core",
@@ -439,7 +439,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clap",
  "quote",
@@ -449,7 +449,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "js-sys",
  "proc-macro2",
@@ -466,7 +466,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-macro"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "proc-macro2",
  "quote",

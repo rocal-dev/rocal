@@ -15,12 +15,12 @@ Rocal adopts MVC(Model-View-Controller) architecture, so if you are not familiar
 
 ### Requirements
 - [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) which is used to build an Rocal application
-- (Optional) [miniserver](https://github.com/svenstaro/miniserve) which is used to serve an Rocal application
+- (Optional) [miniserve](https://github.com/svenstaro/miniserve) which is used to serve an Rocal application
 
 1. Install Rocal by the command below if you haven't yet:
 
 ```bash
-$ cargo install rocal
+$ cargo install rocal --features="cli"
 ```
 
 2. Create a new Rocal application:
