@@ -1,6 +1,6 @@
 use clap::{builder::Str, command, Arg, Command, Id};
 
-use crate::{build::build, init::init};
+use crate::{build::build, init::init, publish::publish};
 
 pub fn run() {
     let matches = command!()
@@ -16,6 +16,7 @@ pub fn run() {
                 ),
         )
         .subcommand(Command::new(Subcommand::Build).about("Build a rocal app"))
+        .subcommand(Command::new(Subcommand::Publish).about("Publish a rocal app"))
         .about("A tool to create and build a rocal app.")
         .get_matches();
 
@@ -27,6 +28,8 @@ pub fn run() {
                 }
             } else if name == Subcommand::Build.as_str() {
                 build();
+            } else if name == Subcommand::Publish.as_str() {
+                publish();
             }
         }
         None => (),
@@ -36,6 +39,7 @@ pub fn run() {
 enum Subcommand {
     New,
     Build,
+    Publish,
 }
 
 enum InitCommandArg {
@@ -53,6 +57,7 @@ impl Subcommand {
         match self {
             Subcommand::New => "new",
             Subcommand::Build => "build",
+            Subcommand::Publish => "publish",
         }
     }
 }

@@ -7,6 +7,7 @@ pub fn build() {
         .arg("build")
         .arg("--target")
         .arg("web")
+        .arg("--dev")
         .output()
         .expect("Confirm you run this command in a rocal project or you've installed wasm-pack");
 
