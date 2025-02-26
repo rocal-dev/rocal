@@ -99,6 +99,8 @@ $ rocal publish
 
 where `myapp` is the application name
 
+Then you can find `release/` and `release.tar.gz` to publish to your hosting server.
+
 
 ## License
 

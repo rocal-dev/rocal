@@ -2,6 +2,7 @@
 name = "rocal-cli"
 version = "0.1.1"
 edition = "2021"
+build = "build.rs"
 
 authors = ["Yoshiki Sashiyama <yoshi@rocal.dev>"]
 description = "CLI tool for local-first-development driven web application framework"
@@ -17,6 +18,10 @@ syn = { version = "2.0", features = ["extra-traits"] }
 clap = { version = "4.5.28", features = ["cargo"] }
 tar = "0.4"
 flate2 = "1.0"
+reqwest = { version = "0.12", features = ["json"] }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+keyring = { version = "3", features = ["apple-native", "windows-native", "linux-native"] }
 
 [dependencies.uuid]
 version = "1.13.1"
