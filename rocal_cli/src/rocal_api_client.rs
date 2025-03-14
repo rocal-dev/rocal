@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use cancel_subscription::CancelSubscription;
 use create_payment_link::CreatePaymentLink;
 use create_user::CreateUser;
 use login_user::LoginUser;
@@ -9,6 +10,7 @@ use reqwest::Client;
 use send_email_verification::SendEmailVerification;
 use send_password_reset_email::SendPasswordResetEmail;
 use serde::{de::DeserializeOwned, Serialize};
+use subscription_status::SubscriptionStatus;
 use user_login_token::UserLoginToken;
 use user_refresh_token::UserRefreshToken;
 
@@ -21,6 +23,7 @@ use crate::{
     token_manager::{self, TokenManager},
 };
 
+pub mod cancel_subscription;
 pub mod create_payment_link;
 pub mod create_user;
 pub mod login_user;
@@ -28,6 +31,7 @@ mod oob_code_response;
 mod payment_link;
 pub mod send_email_verification;
 pub mod send_password_reset_email;
+pub mod subscription_status;
 mod user_login_token;
 pub mod user_refresh_token;
 
@@ -60,16 +64,18 @@ impl RocalAPIClient {
 
     pub async fn sign_up(&self, user: CreateUser) {
         let mut indicator = IndicatorLauncher::new()
-            .kind(Kind::Spinner)
+            .kind(Kind::Dots)
             .interval(100)
             .text("Signing up...")
-            .color(Color::Blue)
+            .color(Color::White)
             .start();
 
         match self
-            .post::<CreateUser, UserLoginToken>(
+            .req::<CreateUser, UserLoginToken>(
+                RequestMethod::Post,
                 &format!("{}/v1/users/sign-up", self.endpoint),
-                user,
+                Some(user),
+                None,
             )
             .await
         {
@@ -98,14 +104,19 @@ impl RocalAPIClient {
 
     pub async fn sign_in(&self, user: LoginUser) -> Result<(), String> {
         let mut indicator = IndicatorLauncher::new()
-            .kind(Kind::Spinner)
+            .kind(Kind::Dots)
             .interval(100)
             .text("Signing in...")
-            .color(Color::Blue)
+            .color(Color::White)
             .start();
 
         match self
-            .post::<LoginUser, UserLoginToken>(&format!("{}/v1/users/sign-in", self.endpoint), user)
+            .req::<LoginUser, UserLoginToken>(
+                RequestMethod::Post,
+                &format!("{}/v1/users/sign-in", self.endpoint),
+                Some(user),
+                None,
+            )
             .await
         {
             Ok(data) => {
@@ -135,16 +146,18 @@ impl RocalAPIClient {
 
     pub async fn refresh_user_login_token(&self, refresh_token: &str) -> Result<(), String> {
         let mut indicator = IndicatorLauncher::new()
-            .kind(Kind::Spinner)
+            .kind(Kind::Dots)
             .interval(100)
             .text("Refreshing your access token...")
-            .color(Color::Blue)
+            .color(Color::White)
             .start();
 
         match self
-            .post::<UserRefreshToken, UserLoginToken>(
+            .req::<UserRefreshToken, UserLoginToken>(
+                RequestMethod::Post,
                 &format!("{}/v1/users/refresh-token", self.endpoint),
-                UserRefreshToken::new(refresh_token),
+                Some(UserRefreshToken::new(refresh_token)),
+                None,
             )
             .await
         {
@@ -175,16 +188,18 @@ impl RocalAPIClient {
 
     pub async fn send_email_verification(&self, req: SendEmailVerification) {
         let mut indicator = IndicatorLauncher::new()
-            .kind(Kind::Spinner)
+            .kind(Kind::Dots)
             .interval(100)
             .text("Sending an email verification...")
-            .color(Color::Blue)
+            .color(Color::White)
             .start();
 
         match self
-            .post::<SendEmailVerification, OobCodeResponse>(
+            .req::<SendEmailVerification, OobCodeResponse>(
+                RequestMethod::Post,
                 &format!("{}/v1/users/send-email-verification", self.endpoint),
-                req,
+                Some(req),
+                None,
             )
             .await
         {
@@ -212,16 +227,18 @@ impl RocalAPIClient {
         req: SendPasswordResetEmail,
     ) -> Result<(), String> {
         let mut indicator = IndicatorLauncher::new()
-            .kind(Kind::Spinner)
+            .kind(Kind::Dots)
             .interval(100)
             .text("Sending a password reset email...")
-            .color(Color::Blue)
+            .color(Color::White)
             .start();
 
         match self
-            .post::<SendPasswordResetEmail, OobCodeResponse>(
+            .req::<SendPasswordResetEmail, OobCodeResponse>(
+                RequestMethod::Post,
                 &format!("{}/v1/users/send-password-reset-email", self.endpoint),
-                req,
+                Some(req),
+                None,
             )
             .await
         {
@@ -250,19 +267,20 @@ impl RocalAPIClient {
         create_payment_link: CreatePaymentLink,
     ) -> Result<String, String> {
         let mut indicator = IndicatorLauncher::new()
-            .kind(Kind::Spinner)
+            .kind(Kind::Dots)
             .interval(100)
             .text("Issuing a payment link for your plan...")
-            .color(Color::Blue)
+            .color(Color::White)
             .start();
 
         match TokenManager::get_token(token_manager::Kind::RocalAccessToken) {
             Ok(token) => {
                 match self
-                    .authorized_post::<CreatePaymentLink, PaymentLink>(
-                        &token,
+                    .req::<CreatePaymentLink, PaymentLink>(
+                        RequestMethod::Post,
                         &format!("{}/v1/subscriptions", self.endpoint),
-                        create_payment_link,
+                        Some(create_payment_link),
+                        Some(&token),
                     )
                     .await
                 {
@@ -283,44 +301,109 @@ impl RocalAPIClient {
         }
     }
 
-    async fn post<T, U>(&self, path: &str, data: T) -> Result<U, String>
-    where
-        T: Serialize,
-        U: DeserializeOwned + Clone,
-    {
-        match self.client.post(path).json(&data).send().await {
-            Ok(res) => match res.json::<ResponseWithMessage<U>>().await {
-                Ok(res) => {
-                    if let Some(data) = res.get_data() {
-                        Ok(data.clone())
-                    } else {
-                        Err(res.get_message().to_string())
+    pub async fn get_subscription_status(&self) -> Result<SubscriptionStatus, String> {
+        let mut indicator = IndicatorLauncher::new()
+            .kind(Kind::Dots)
+            .interval(100)
+            .text("Checking your subscription status...")
+            .color(Color::White)
+            .start();
+
+        match TokenManager::get_token(token_manager::Kind::RocalAccessToken) {
+            Ok(token) => {
+                match self
+                    .req::<(), SubscriptionStatus>(
+                        RequestMethod::Get,
+                        &format!("{}/v1/subscriptions/status", self.endpoint),
+                        None,
+                        Some(&token),
+                    )
+                    .await
+                {
+                    Ok(sub) => {
+                        let _ = indicator.stop();
+                        Ok(sub)
+                    }
+                    Err(err) => {
+                        let _ = indicator.stop();
+                        Err(format!("{}", err.to_string()))
                     }
                 }
-                Err(err) => Err(format!("{}", err.to_string())),
-            },
-            Err(err) => Err(format!("{}", err.to_string())),
+            }
+            Err(err) => {
+                let _ = indicator.stop();
+                Err(format!("{}", err.to_string()))
+            }
         }
     }
 
-    async fn authorized_post<T, U>(
+    pub async fn unsubscribe(&self, cancel_subscription: CancelSubscription) -> Result<(), String> {
+        let mut indicator = IndicatorLauncher::new()
+            .kind(Kind::Dots)
+            .interval(100)
+            .text("Processing...")
+            .color(Color::White)
+            .start();
+
+        let access_token = match TokenManager::get_token(token_manager::Kind::RocalAccessToken) {
+            Ok(token) => token,
+            Err(err) => {
+                let _ = indicator.stop();
+                return Err(format!("{}", err.to_string()));
+            }
+        };
+
+        match self
+            .req::<CancelSubscription, String>(
+                RequestMethod::Patch,
+                &format!("{}/v1/subscriptions/unsubscribe", self.endpoint),
+                Some(cancel_subscription),
+                Some(&access_token),
+            )
+            .await
+        {
+            Ok(_) => {}
+            Err(err) => {
+                let _ = indicator.stop();
+                return Err(err);
+            }
+        }
+
+        let _ = indicator.stop();
+
+        Ok(())
+    }
+
+    async fn req<T, U>(
         &self,
-        access_token: &str,
+        method: RequestMethod,
         path: &str,
-        data: T,
+        data: Option<T>,
+        access_token: Option<&str>,
     ) -> Result<U, String>
     where
         T: Serialize,
         U: DeserializeOwned + Clone,
     {
-        match self
-            .client
-            .post(path)
-            .bearer_auth(access_token)
-            .json(&data)
-            .send()
-            .await
-        {
+        let req = match (method, data, access_token) {
+            (RequestMethod::Get, None, None) => self.client.get(path),
+            (RequestMethod::Get, None, Some(access_token)) => {
+                self.client.get(path).bearer_auth(access_token)
+            }
+            (RequestMethod::Post, Some(data), None) => self.client.post(path).json(&data),
+            (RequestMethod::Post, Some(data), Some(access_token)) => {
+                self.client.post(path).bearer_auth(access_token).json(&data)
+            }
+            (RequestMethod::Patch, Some(data), None) => self.client.patch(path).json(&data),
+            (RequestMethod::Patch, Some(data), Some(access_token)) => self
+                .client
+                .patch(path)
+                .bearer_auth(access_token)
+                .json(&data),
+            _ => return Err("Failed to construct a request".to_string()),
+        };
+
+        match req.send().await {
             Ok(res) => match res.json::<ResponseWithMessage<U>>().await {
                 Ok(res) => {
                     if let Some(data) = res.get_data() {
@@ -334,4 +417,10 @@ impl RocalAPIClient {
             Err(err) => Err(format!("{}", err.to_string())),
         }
     }
+}
+
+enum RequestMethod {
+    Get,
+    Post,
+    Patch,
 }

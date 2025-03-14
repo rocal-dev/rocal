@@ -1,8 +1,12 @@
 use core::time;
 use std::{
     io::Write,
-    sync::{Arc, Mutex},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
     thread,
+    time::Duration,
 };
 
 use super::color::Color;
@@ -12,10 +16,10 @@ use super::color::Color;
 ///
 /// ```rust
 /// let mut indicator = IndicatorLauncher::new()
-///     .kind(Kind::Spinner)
+///     .kind(Kind::Dots)
 ///     .interval(100)
 ///     .text("Processing...")
-///     .color(Color::Blue)
+///     .color(Color::White)
 ///     .start();
 ///
 /// thread::sleep(Duration::from_millis(1000));
@@ -31,10 +35,11 @@ use super::color::Color;
 #[derive(Clone, Copy)]
 pub enum Kind {
     Spinner,
+    Dots,
 }
 
 pub struct Indicator {
-    is_processing: Arc<Mutex<bool>>,
+    is_processing: Arc<AtomicBool>,
 }
 
 pub struct IndicatorLauncher {
@@ -105,22 +110,32 @@ impl IndicatorLauncher {
 
 impl Indicator {
     pub fn start(kind: Kind, interval_millis: u64, text: &str, color: Color) -> Self {
-        let is_processing = Arc::new(Mutex::new(true));
+        let is_processing = Arc::new(AtomicBool::new(true));
         let is_processing_cloned = Arc::clone(&is_processing);
         let text = text.to_string();
+        let interval = time::Duration::from_millis(interval_millis);
+        let check_interval = Duration::from_millis(10);
 
         thread::spawn(move || {
             let mut f = std::io::stdout();
-            let interval = time::Duration::from_millis(interval_millis);
 
-            while {
-                let is_processing = is_processing_cloned.lock().unwrap();
-                *is_processing
-            } {
+            while is_processing_cloned.load(Ordering::SeqCst) {
                 for i in kind.symbols().iter() {
+                    if !is_processing_cloned.load(Ordering::SeqCst) {
+                        break;
+                    }
+
                     write!(f, "\r{}{} {}{}", color.code(), i, text, Color::reset()).unwrap();
                     f.flush().unwrap();
-                    thread::sleep(interval);
+
+                    let mut elapsed = Duration::from_millis(0);
+                    while elapsed < interval {
+                        if !is_processing_cloned.load(Ordering::SeqCst) {
+                            break;
+                        }
+                        thread::sleep(check_interval);
+                        elapsed += check_interval;
+                    }
                 }
             }
         });
@@ -129,11 +144,11 @@ impl Indicator {
     }
 
     pub fn stop(&mut self) -> Result<(), std::io::Error> {
-        let mut is_processing = self.is_processing.lock().unwrap();
-        *is_processing = false;
+        self.is_processing.store(false, Ordering::SeqCst);
 
         let mut f = std::io::stdout();
         write!(f, "\r\x1b[2K")?;
+        f.flush()?;
 
         Ok(())
     }
@@ -143,6 +158,7 @@ impl Kind {
     fn symbols(&self) -> Vec<&str> {
         match self {
             Self::Spinner => vec!["|", "/", "-", "\\"],
+            Self::Dots => vec!["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"],
         }
     }
 }

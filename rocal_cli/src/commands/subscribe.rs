@@ -6,6 +6,19 @@ use crate::{
 use super::utils::{get_user_input, refresh_user_token::refresh_user_token};
 
 pub async fn subscribe() -> Result<(), std::io::Error> {
+    refresh_user_token().await;
+
+    if has_subscribed().await {
+        show_plans()?;
+        return Ok(());
+    }
+
+    println!(
+        "Choose your plan from these options ({} or {})",
+        &Color::Green.text("basic"),
+        &Color::Blue.text("developer")
+    );
+
     show_plans()?;
 
     let plan = get_user_input("a plan (basic or developer)");
@@ -19,11 +32,31 @@ pub async fn subscribe() -> Result<(), std::io::Error> {
         return Ok(());
     }
 
-    refresh_user_token().await;
-
     create_payment_link(&plan).await;
 
     Ok(())
+}
+
+async fn has_subscribed() -> bool {
+    let client = RocalAPIClient::new();
+
+    match client.get_subscription_status().await {
+        Ok(status) => {
+            if status.get_plan() == "N/A" {
+                println!("{}", Color::Red.text("Your plan is unavailable now. Please feel free to get in touch with our support via email"));
+            } else {
+                println!(
+                    "{}",
+                    Color::Green.text(&format!(
+                        "Your plan is {}.",
+                        status.get_plan().to_uppercase()
+                    ))
+                );
+            }
+            true
+        }
+        Err(_) => false,
+    }
 }
 
 async fn create_payment_link(plan: &str) {
@@ -52,12 +85,6 @@ async fn create_payment_link(plan: &str) {
 }
 
 fn show_plans() -> Result<(), std::io::Error> {
-    println!(
-        "Choose your plan from these options ({} or {})",
-        &Color::Green.text("basic"),
-        &Color::Blue.text("developer")
-    );
-
     let mut list = List::new();
 
     // Basic

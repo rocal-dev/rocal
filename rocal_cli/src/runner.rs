@@ -2,7 +2,7 @@ use clap::{builder::Str, command, Arg, Command, Id};
 
 use crate::commands::{
     build::build, init::init, login::login, password, publish::publish, register::register,
-    subscribe::subscribe,
+    subscribe::subscribe, unsubscribe::unsubscribe,
 };
 
 /*
@@ -121,6 +121,8 @@ pub async fn run() {
                 if let Err(err) = subscribe().await {
                     println!("Error: {}", err.to_string());
                 }
+            } else if name == Subcommand::Unsubscribe.as_str() {
+                unsubscribe().await;
             }
         }
         None => (),
