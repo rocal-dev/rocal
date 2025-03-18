@@ -1,5 +1,8 @@
 use crate::{
-    commands::utils::{color::Color, list::List, open_link::open_link},
+    commands::{
+        unsubscribe::get_subscription_status,
+        utils::{color::Color, list::List, open_link::open_link},
+    },
     rocal_api_client::{create_payment_link::CreatePaymentLink, RocalAPIClient},
 };
 
@@ -8,7 +11,9 @@ use super::utils::{get_user_input, refresh_user_token::refresh_user_token};
 pub async fn subscribe() -> Result<(), std::io::Error> {
     refresh_user_token().await;
 
-    if has_subscribed().await {
+    if let Ok(status) = get_subscription_status().await {
+        println!("Your plan is {}", status.get_plan());
+
         show_plans()?;
         return Ok(());
     }
@@ -35,28 +40,6 @@ pub async fn subscribe() -> Result<(), std::io::Error> {
     create_payment_link(&plan).await;
 
     Ok(())
-}
-
-async fn has_subscribed() -> bool {
-    let client = RocalAPIClient::new();
-
-    match client.get_subscription_status().await {
-        Ok(status) => {
-            if status.get_plan() == "N/A" {
-                println!("{}", Color::Red.text("Your plan is unavailable now. Please feel free to get in touch with our support via email"));
-            } else {
-                println!(
-                    "{}",
-                    Color::Green.text(&format!(
-                        "Your plan is {}.",
-                        status.get_plan().to_uppercase()
-                    ))
-                );
-            }
-            true
-        }
-        Err(_) => false,
-    }
 }
 
 async fn create_payment_link(plan: &str) {

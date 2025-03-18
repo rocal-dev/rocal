@@ -1,15 +1,17 @@
-use std::time::Duration;
+use std::{fs, time::Duration};
 
 use cancel_subscription::CancelSubscription;
+use create_app::CreateApp;
 use create_payment_link::CreatePaymentLink;
 use create_user::CreateUser;
 use login_user::LoginUser;
 use oob_code_response::OobCodeResponse;
 use payment_link::PaymentLink;
-use reqwest::Client;
+use reqwest::{Client, RequestBuilder};
 use send_email_verification::SendEmailVerification;
 use send_password_reset_email::SendPasswordResetEmail;
 use serde::{de::DeserializeOwned, Serialize};
+use subdomain::Subdomain;
 use subscription_status::SubscriptionStatus;
 use user_login_token::UserLoginToken;
 use user_refresh_token::UserRefreshToken;
@@ -24,6 +26,7 @@ use crate::{
 };
 
 pub mod cancel_subscription;
+pub mod create_app;
 pub mod create_payment_link;
 pub mod create_user;
 pub mod login_user;
@@ -31,6 +34,7 @@ mod oob_code_response;
 mod payment_link;
 pub mod send_email_verification;
 pub mod send_password_reset_email;
+pub mod subdomain;
 pub mod subscription_status;
 mod user_login_token;
 pub mod user_refresh_token;
@@ -296,7 +300,10 @@ impl RocalAPIClient {
             }
             Err(err) => {
                 let _ = indicator.stop();
-                Err(format!("{}", err.to_string()))
+                match err {
+                    keyring::Error::NoEntry => Err("Please sign in/up first.".to_string()),
+                    _ => Err(format!("{}", err.to_string())),
+                }
             }
         }
     }
@@ -374,6 +381,165 @@ impl RocalAPIClient {
         Ok(())
     }
 
+    pub async fn upload_app(&self, create_app: CreateApp, file_path: &str) -> Result<(), String> {
+        let mut indicator = IndicatorLauncher::new()
+            .kind(Kind::Dots)
+            .interval(100)
+            .text("Uploading...")
+            .color(Color::White)
+            .start();
+
+        let access_token = match TokenManager::get_token(token_manager::Kind::RocalAccessToken) {
+            Ok(token) => token,
+            Err(err) => {
+                let _ = indicator.stop();
+                return Err(format!("{}", err.to_string()));
+            }
+        };
+
+        match self
+            .req::<CreateApp, String>(
+                RequestMethod::Post,
+                &format!("{}/v1/apps", self.endpoint),
+                Some(create_app),
+                Some(&access_token),
+            )
+            .await
+        {
+            Ok(presigned_url) => {
+                let file_bytes = if let Ok(bytes) = fs::read(file_path) {
+                    bytes
+                } else {
+                    let _ = indicator.stop();
+                    return Err("Could not find release.tar.gz to publish".to_string());
+                };
+
+                let res = match self
+                    .client
+                    .put(&presigned_url)
+                    .body(file_bytes)
+                    .header("Content-Type", "application/x-tar")
+                    .send()
+                    .await
+                {
+                    Ok(res) => res,
+                    Err(err) => {
+                        let _ = indicator.stop();
+                        return Err(err.to_string());
+                    }
+                };
+
+                if !res.status().is_success() {
+                    let _ = indicator.stop();
+                    return Err(format!("Upload failed with status: {}", &res.status()));
+                }
+
+                let _ = indicator.stop();
+                Ok(())
+            }
+            Err(err) => {
+                let _ = indicator.stop();
+                Err(err)
+            }
+        }
+    }
+
+    pub async fn get_subdomain(&self, app_name: &str) -> Result<Option<Subdomain>, String> {
+        let mut indicator = IndicatorLauncher::new()
+            .kind(Kind::Dots)
+            .interval(100)
+            .text("Processing...")
+            .color(Color::White)
+            .start();
+
+        let access_token = match TokenManager::get_token(token_manager::Kind::RocalAccessToken) {
+            Ok(token) => token,
+            Err(err) => {
+                let _ = indicator.stop();
+                return Err(format!("{}", err.to_string()));
+            }
+        };
+
+        match self
+            .req::<(), Option<Subdomain>>(
+                RequestMethod::Get,
+                &format!("{}/v1/subdomains/{}", self.endpoint, app_name),
+                None,
+                Some(&access_token),
+            )
+            .await
+        {
+            Ok(subdomain) => {
+                let _ = indicator.stop();
+                Ok(subdomain)
+            }
+            Err(err) => {
+                let _ = indicator.stop();
+
+                if &err == "not exists" {
+                    Ok(None)
+                } else {
+                    Err(err)
+                }
+            }
+        }
+    }
+
+    pub async fn check_subdomain_existence(&self, subdomain: &str) -> Result<bool, String> {
+        let mut indicator = IndicatorLauncher::new()
+            .kind(Kind::Dots)
+            .interval(100)
+            .text("Checking...")
+            .color(Color::White)
+            .start();
+
+        let access_token = match TokenManager::get_token(token_manager::Kind::RocalAccessToken) {
+            Ok(token) => token,
+            Err(err) => {
+                let _ = indicator.stop();
+                return Err(format!("{}", err.to_string()));
+            }
+        };
+
+        match self
+            .req::<(), bool>(
+                RequestMethod::Get,
+                &format!("{}/v1/subdomains/exists/{}", self.endpoint, subdomain),
+                None,
+                Some(&access_token),
+            )
+            .await
+        {
+            Ok(exists) => {
+                let _ = indicator.stop();
+                Ok(exists)
+            }
+            Err(err) => {
+                let _ = indicator.stop();
+                Err(err)
+            }
+        }
+    }
+
+    async fn handle_response<T>(&self, req: RequestBuilder) -> Result<T, String>
+    where
+        T: DeserializeOwned + Clone,
+    {
+        match req.send().await {
+            Ok(res) => match res.json::<ResponseWithMessage<T>>().await {
+                Ok(res) => {
+                    if let Some(data) = res.get_data() {
+                        Ok(data.clone())
+                    } else {
+                        Err(res.get_message().to_string())
+                    }
+                }
+                Err(err) => Err(format!("{}", err.to_string())),
+            },
+            Err(err) => Err(format!("{}", err.to_string())),
+        }
+    }
+
     async fn req<T, U>(
         &self,
         method: RequestMethod,
@@ -403,19 +569,7 @@ impl RocalAPIClient {
             _ => return Err("Failed to construct a request".to_string()),
         };
 
-        match req.send().await {
-            Ok(res) => match res.json::<ResponseWithMessage<U>>().await {
-                Ok(res) => {
-                    if let Some(data) = res.get_data() {
-                        Ok(data.clone())
-                    } else {
-                        Err(res.get_message().to_string())
-                    }
-                }
-                Err(err) => Err(format!("{}", err.to_string())),
-            },
-            Err(err) => Err(format!("{}", err.to_string())),
-        }
+        self.handle_response(req).await
     }
 }
 

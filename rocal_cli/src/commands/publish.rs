@@ -8,8 +8,59 @@ use std::{
 use flate2::{write::GzEncoder, Compression};
 use tar::Builder;
 
-pub fn publish() {
-    println!("Building...");
+use crate::{
+    commands::utils::{
+        color::Color,
+        indicator::{IndicatorLauncher, Kind},
+    },
+    rocal_api_client::{create_app::CreateApp, RocalAPIClient},
+};
+
+use super::{
+    unsubscribe::get_subscription_status,
+    utils::{get_user_input, refresh_user_token::refresh_user_token},
+};
+
+pub async fn publish() {
+    refresh_user_token().await;
+
+    if let Err(_) = get_subscription_status().await {
+        println!("Need to subscribe a plan to publish your app. (`rocal subscribe` first.)");
+        return;
+    }
+
+    let subdomain = match get_subdomain().await {
+        Ok(Some(subdomain)) => subdomain,
+        Ok(None) => {
+            let mut subdomain = get_user_input("subdomain where you host this app");
+
+            while {
+                match check_subdomain_existence(&subdomain).await {
+                    Ok(exists) => exists,
+                    Err(err) => {
+                        eprintln!("{}", err);
+                        return;
+                    }
+                }
+            } {
+                println!("{} has already been taken.", &subdomain);
+                subdomain = get_user_input("subdomain where you host this app");
+            }
+
+            subdomain
+        }
+        Err(err) => {
+            eprintln!("{}", &err);
+            return;
+        }
+    };
+
+    let mut indicator = IndicatorLauncher::new()
+        .kind(Kind::Dots)
+        .interval(100)
+        .text("Building...")
+        .color(Color::White)
+        .start();
 
     let root_path = find_project_root().expect(
         "Failed to find a project root. Please run the command in a project built by Cargo",
@@ -28,6 +79,8 @@ pub fn publish() {
         .output()
         .expect("Confirm you run this command in a rocal project or you've installed wasm-pack");
 
+    let _ = indicator.stop();
+
     if !output.status.success() {
         eprintln!(
             "rocal build failed: {}",
@@ -36,14 +89,25 @@ pub fn publish() {
         return;
     }
 
-    println!("Compressing...");
-    create_release_artifact(&root_path);
-    println!("Compressed.");
+    create_release_artifact(&root_path).await;
 
-    println!("Done.");
+    if let Some(app_name) = root_path.file_name() {
+        let app_name = app_name.to_string_lossy();
+        upload(&root_path.join("release.tar.gz"), &app_name, &subdomain).await;
+        println!("Uploaded. Go to https://{}.rocal.dev", &subdomain);
+    } else {
+        eprintln!("Failed to upload your app (Reason: could not find your app name)");
+    }
 }
 
-fn create_release_artifact(root_path: &PathBuf) {
+async fn create_release_artifact(root_path: &PathBuf) {
+    let mut indicator = IndicatorLauncher::new()
+        .kind(Kind::Dots)
+        .interval(100)
+        .text("Compressing...")
+        .color(Color::White)
+        .start();
+
     fs::create_dir_all("release/pkg").expect("Failed to create release/pkg");
     fs::create_dir_all("release/js").expect("Failed to create release/js");
 
@@ -56,15 +120,11 @@ fn create_release_artifact(root_path: &PathBuf) {
     )
     .expect("Failed to compress index.html");
 
-    println!("Compressed index.html");
-
     compress(
         &root_path.join("sw.js"),
         &root_path.join("release/sw.js.br"),
     )
     .expect("Failed to compress sw.js");
-
-    println!("Compressed sw.js");
 
     pkg_files.iter().for_each(|file| {
         let to = &root_path.join("release/pkg").join(&format!(
@@ -74,8 +134,6 @@ fn create_release_artifact(root_path: &PathBuf) {
         compress(&file, to).expect(&format!("Failed to compress {}", file.to_str().unwrap()));
     });
 
-    println!("Compressed pkg/");
-
     js_files.iter().for_each(|file| {
         let to = &root_path.join("release/js").join(&format!(
             "{}.br",
@@ -83,10 +141,6 @@ fn create_release_artifact(root_path: &PathBuf) {
         ));
         compress(&file, to).expect(&format!("Failed to compress {}", file.to_str().unwrap()));
     });
-
-    println!("Compressed js/");
-
-    println!("Generating release file...");
 
     let tar_gz = File::create("release.tar.gz").expect("Failed to create release.tar.gz");
 
@@ -100,7 +154,51 @@ fn create_release_artifact(root_path: &PathBuf) {
     tar.finish()
         .expect("Failed to finish creating release.tar.gz");
 
+    let _ = indicator.stop();
+
     println!("Generated release.tar.gz");
+}
+
+async fn upload(app_path: &PathBuf, app_name: &str, subdomain: &str) {
+    let client = RocalAPIClient::new();
+
+    if let Err(err) = client
+        .upload_app(
+            CreateApp::new(app_name, subdomain),
+            app_path.to_str().unwrap(),
+        )
+        .await
+    {
+        eprintln!("{}", &err);
+    }
+}
+
+async fn get_subdomain() -> Result<Option<String>, String> {
+    let root_path = find_project_root().expect(
+        "Failed to find a project root. Please run the command in a project built by Cargo",
+    );
+
+    let app_name = root_path
+        .file_name()
+        .expect("Failed to find your app name")
+        .to_string_lossy();
+
+    let client = RocalAPIClient::new();
+
+    match client.get_subdomain(&app_name).await {
+        Ok(Some(subdomain)) => Ok(Some(subdomain.get_subdomain().to_string())),
+        Err(err) => Err(err),
+        _ => Ok(None),
+    }
+}
+
+async fn check_subdomain_existence(subdomain: &str) -> Result<bool, String> {
+    let client = RocalAPIClient::new();
+
+    match client.check_subdomain_existence(subdomain).await {
+        Ok(exists) => Ok(exists),
+        Err(err) => Err(format!("{}", err.to_string())),
+    }
 }
 
 fn compress(from: &PathBuf, to: &PathBuf) -> std::io::Result<Output> {

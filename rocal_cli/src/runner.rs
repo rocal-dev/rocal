@@ -103,7 +103,7 @@ pub async fn run() {
             } else if name == Subcommand::Build.as_str() {
                 build();
             } else if name == Subcommand::Publish.as_str() {
-                publish();
+                publish().await;
             } else if name == Subcommand::Register.as_str() {
                 register().await;
             } else if name == Subcommand::Login.as_str() {

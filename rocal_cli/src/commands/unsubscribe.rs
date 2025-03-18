@@ -83,7 +83,7 @@ async fn handle_unsubscribe() {
     }
 }
 
-async fn get_subscription_status() -> Result<SubscriptionStatus, ()> {
+pub async fn get_subscription_status() -> Result<SubscriptionStatus, ()> {
     let client = RocalAPIClient::new();
 
     match client.get_subscription_status().await {

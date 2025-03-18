@@ -1,7 +1,17 @@
 use std::process::Command;
 
+use super::utils::{
+    color::Color,
+    indicator::{IndicatorLauncher, Kind},
+};
+
 pub fn build() {
-    println!("Building...");
+    let mut indicator = IndicatorLauncher::new()
+        .kind(Kind::Dots)
+        .interval(100)
+        .text("Building...")
+        .color(Color::White)
+        .start();
 
     let output = Command::new("wasm-pack")
         .arg("build")
@@ -10,6 +20,8 @@ pub fn build() {
         .arg("--dev")
         .output()
         .expect("Confirm you run this command in a rocal project or you've installed wasm-pack");
+
+    let _ = indicator.stop();
 
     if !output.status.success() {
         eprintln!(
