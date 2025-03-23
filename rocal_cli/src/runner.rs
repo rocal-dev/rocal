@@ -5,48 +5,6 @@ use crate::commands::{
     subscribe::subscribe, unsubscribe::unsubscribe,
 };
 
-/*
-$ rocal register
-Email:
-Password:
-Workspace:
-
-$ rocal login
-EMAIL:
-PASSWORD:
-
-// $ rocal workspace new -n <workspace>
-// $ rocal workspace change -n <workspace>
-// $ rocal workspace list
-// - * A (default)
-// - B
-
-$ rocal subscribe
-PLAN 1: $10 - versioning, rollback, caching
-PLAN 2: $20 - sync server
-
-$ rocal unsubscribe
-
-$ rocal token list
-5096d13e-7ed2-4415-9fd6-fe1e52ccedd9
-16be024b-ef4c-4308-a312-1c001df9b973
-
-$ rocal token new
-df20f838-ed31-43e8-97fd-3d5db69cf176
-
-$ rocal token revoke <token>
-$ rocal token set <token>
-
-$ rocal build --dev
-$ rocal build --release
-
-$ rocal publish
-if there is not token, it raises an error
-
-$ rocal password reset
-Email:
- */
-
 pub async fn run() {
     let matches = command!()
         .subcommand(
@@ -64,14 +22,6 @@ pub async fn run() {
         .subcommand(
             Command::new(Subcommand::Unsubscribe)
                 .about("Unsubscribe Rocal platform which leads to revoke tokens and shut your hosting app down")
-        )
-        .subcommand(
-            Command::new(Subcommand::Token)
-                .about("Manipulate token that is required to publish a Rocal app")
-                .subcommand(Command::new(TokenSubcommand::New).about("Create a new token"))
-                .subcommand(Command::new(TokenSubcommand::List).about("List tokens you created"))
-                .subcommand(Command::new(TokenSubcommand::Revoke).about("Revoke a token"))
-                .subcommand(Command::new(TokenSubcommand::Set).about("Set a token"))
         )
         .subcommand(
             Command::new(Subcommand::New)
@@ -134,18 +84,10 @@ enum Subcommand {
     Login,
     Subscribe,
     Unsubscribe,
-    Token,
     New,
     Build,
     Publish,
     Password,
-}
-
-enum TokenSubcommand {
-    New,
-    List,
-    Revoke,
-    Set,
 }
 
 enum PasswordSubcommand {
@@ -169,28 +111,10 @@ impl Subcommand {
             Subcommand::Login => "login",
             Subcommand::Subscribe => "subscribe",
             Subcommand::Unsubscribe => "unsubscribe",
-            Subcommand::Token => "token",
             Subcommand::New => "new",
             Subcommand::Build => "build",
             Subcommand::Publish => "publish",
             Subcommand::Password => "password",
-        }
-    }
-}
-
-impl Into<Str> for TokenSubcommand {
-    fn into(self) -> Str {
-        self.as_str().into()
-    }
-}
-
-impl TokenSubcommand {
-    pub fn as_str(self) -> &'static str {
-        match self {
-            TokenSubcommand::New => "new",
-            TokenSubcommand::List => "list",
-            TokenSubcommand::Revoke => "revoke",
-            TokenSubcommand::Set => "set",
         }
     }
 }

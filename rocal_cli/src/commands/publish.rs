@@ -94,6 +94,7 @@ pub async fn publish() {
     if let Some(app_name) = root_path.file_name() {
         let app_name = app_name.to_string_lossy();
         upload(&root_path.join("release.tar.gz"), &app_name, &subdomain).await;
+        extract(&subdomain).await;
         println!("Uploaded. Go to https://{}.rocal.dev", &subdomain);
     } else {
         eprintln!("Failed to upload your app (Reason: could not find your app name)");
@@ -169,6 +170,14 @@ async fn upload(app_path: &PathBuf, app_name: &str, subdomain: &str) {
         )
         .await
     {
+        eprintln!("{}", &err);
+    }
+}
+
+async fn extract(subdomain: &str) {
+    let client = RocalAPIClient::new();
+
+    if let Err(err) = client.extract_app(subdomain).await {
         eprintln!("{}", &err);
     }
 }

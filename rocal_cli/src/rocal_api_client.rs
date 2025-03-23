@@ -444,6 +444,42 @@ impl RocalAPIClient {
         }
     }
 
+    pub async fn extract_app(&self, subdomain: &str) -> Result<(), String> {
+        let mut indicator = IndicatorLauncher::new()
+            .kind(Kind::Dots)
+            .interval(100)
+            .text("Extracting...")
+            .color(Color::White)
+            .start();
+
+        let access_token = match TokenManager::get_token(token_manager::Kind::RocalAccessToken) {
+            Ok(token) => token,
+            Err(err) => {
+                let _ = indicator.stop();
+                return Err(format!("{}", err.to_string()));
+            }
+        };
+
+        match self
+            .req::<(), bool>(
+                RequestMethod::Post,
+                &format!("{}/public-apps-extraction/{}", self.endpoint, subdomain),
+                None,
+                Some(&access_token),
+            )
+            .await
+        {
+            Ok(_) => {
+                let _ = indicator.stop();
+                Ok(())
+            }
+            Err(err) => {
+                let _ = indicator.stop();
+                Err(err.to_string())
+            }
+        }
+    }
+
     pub async fn get_subdomain(&self, app_name: &str) -> Result<Option<Subdomain>, String> {
         let mut indicator = IndicatorLauncher::new()
             .kind(Kind::Dots)
@@ -557,6 +593,9 @@ impl RocalAPIClient {
                 self.client.get(path).bearer_auth(access_token)
             }
             (RequestMethod::Post, Some(data), None) => self.client.post(path).json(&data),
+            (RequestMethod::Post, None, Some(access_token)) => {
+                self.client.post(path).bearer_auth(access_token)
+            }
             (RequestMethod::Post, Some(data), Some(access_token)) => {
                 self.client.post(path).bearer_auth(access_token).json(&data)
             }
