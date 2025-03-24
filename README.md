@@ -16,6 +16,7 @@ Rocal adopts MVC(Model-View-Controller) architecture, so if you are not familiar
 ### Requirements
 - [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) which is used to build an Rocal application
 - (Optional) [miniserve](https://github.com/svenstaro/miniserve) which is used to serve an Rocal application
+- (Optional) [brotli](https://github.com/google/brotli) to be used compressing releasing files to publish. See Section 6.
 
 1. Install Rocal by the command below if you haven't yet:
 
@@ -88,6 +89,19 @@ $ miniserve . --header "Cross-Origin-Opener-Policy: same-origin" --header "Cross
 ```
 
 Go to `http://127.0.0.1:8080/index.html` and you'll see the welcome message!
+
+6. (Optional) Publish a Rocal application:
+- You need to subscribe Basic or Developer plan to host your app on rocal platform. Run `$ rocal subscribe` command to see more detail.
+
+```bash
+$ cd myapp
+$ rocal publish
+```
+
+where `myapp` is the application name
+
+Then you can find `release/` and `release.tar.gz` to publish to your hosting server.
+
 
 ## License
 

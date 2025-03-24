@@ -21,3 +21,6 @@
 /rocal_core/.gitignore
 /rocal_macro/.gitignore
 /examples/hello_world/.gitignore
+
+.env
+.env.debug

@@ -1,6 +1,7 @@
 pub mod cargo_file_generator;
 pub mod controller_generator;
 pub mod entrypoint_generator;
+pub mod gitignore_generator;
 pub mod js_generator;
 pub mod lib_generator;
 pub mod migration_generator;

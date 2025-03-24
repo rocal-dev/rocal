@@ -1,12 +1,31 @@
 use clap::{builder::Str, command, Arg, Command, Id};
 
-use crate::{build::build, init::init};
+use crate::commands::{
+    build::build, init::init, login::login, password, publish::publish, register::register,
+    subscribe::subscribe, unsubscribe::unsubscribe,
+};
 
-pub fn run() {
+pub async fn run() {
     let matches = command!()
         .subcommand(
+            Command::new(Subcommand::Register)
+                .about("Create a new account in Rocal platform")
+        )
+        .subcommand(
+            Command::new(Subcommand::Login)
+                .about("Login to Rocal platform")
+        )
+        .subcommand(
+            Command::new(Subcommand::Subscribe)
+                .about("Subscribe Rocal platform to publish a Rocal app")
+        )
+        .subcommand(
+            Command::new(Subcommand::Unsubscribe)
+                .about("Unsubscribe Rocal platform which leads to revoke tokens and shut your hosting app down")
+        )
+        .subcommand(
             Command::new(Subcommand::New)
-                .about("Create a new rocal app")
+                .about("Create a new Rocal app")
                 .arg(
                     Arg::new(InitCommandArg::Name)
                         .short('n')
@@ -15,8 +34,14 @@ pub fn run() {
                         .help("Set the resulting package name"),
                 ),
         )
-        .subcommand(Command::new(Subcommand::Build).about("Build a rocal app"))
-        .about("A tool to create and build a rocal app.")
+        .subcommand(Command::new(Subcommand::Build).about("Build a Rocal app"))
+        .subcommand(Command::new(Subcommand::Publish).about("Publish a Rocal app"))
+        .subcommand(
+            Command::new(Subcommand::Password)
+                .about("Password settings")
+                .subcommand(Command::new(PasswordSubcommand::Reset).about("Reset your password"))
+        )
+        .about("A tool to create and build a Rocal app.")
         .get_matches();
 
     match matches.subcommand() {
@@ -27,6 +52,27 @@ pub fn run() {
                 }
             } else if name == Subcommand::Build.as_str() {
                 build();
+            } else if name == Subcommand::Publish.as_str() {
+                publish().await;
+            } else if name == Subcommand::Register.as_str() {
+                register().await;
+            } else if name == Subcommand::Login.as_str() {
+                login().await;
+            } else if name == Subcommand::Password.as_str() {
+                match arg_matches.subcommand() {
+                    Some((name, _arg_matches)) => {
+                        if name == PasswordSubcommand::Reset.as_str() {
+                            password::reset().await;
+                        }
+                    }
+                    None => (),
+                }
+            } else if name == Subcommand::Subscribe.as_str() {
+                if let Err(err) = subscribe().await {
+                    println!("Error: {}", err.to_string());
+                }
+            } else if name == Subcommand::Unsubscribe.as_str() {
+                unsubscribe().await;
             }
         }
         None => (),
@@ -34,8 +80,18 @@ pub fn run() {
 }
 
 enum Subcommand {
+    Register,
+    Login,
+    Subscribe,
+    Unsubscribe,
     New,
     Build,
+    Publish,
+    Password,
+}
+
+enum PasswordSubcommand {
+    Reset,
 }
 
 enum InitCommandArg {
@@ -51,8 +107,14 @@ impl Into<Str> for Subcommand {
 impl Subcommand {
     pub fn as_str(self) -> &'static str {
         match self {
+            Subcommand::Register => "register",
+            Subcommand::Login => "login",
+            Subcommand::Subscribe => "subscribe",
+            Subcommand::Unsubscribe => "unsubscribe",
             Subcommand::New => "new",
             Subcommand::Build => "build",
+            Subcommand::Publish => "publish",
+            Subcommand::Password => "password",
         }
     }
 }
@@ -67,6 +129,20 @@ impl InitCommandArg {
     pub fn as_str(self) -> &'static str {
         match self {
             InitCommandArg::Name => "name",
+        }
+    }
+}
+
+impl Into<Str> for PasswordSubcommand {
+    fn into(self) -> Str {
+        self.as_str().into()
+    }
+}
+
+impl PasswordSubcommand {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            PasswordSubcommand::Reset => "reset",
         }
     }
 }
