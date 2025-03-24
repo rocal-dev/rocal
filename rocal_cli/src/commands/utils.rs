@@ -5,7 +5,6 @@ pub mod indicator;
 pub mod list;
 pub mod open_link;
 pub mod refresh_user_token;
-pub mod table;
 
 pub fn get_user_input(label: &str) -> String {
     print!("Enter {}: ", label);

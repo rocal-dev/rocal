@@ -4,6 +4,7 @@ const DEFAULT_KEY: &'static str = "default";
 
 pub struct TokenManager;
 
+#[allow(dead_code)]
 impl TokenManager {
     pub fn set_token(kind: Kind, token: &str) -> Result<(), Error> {
         let entry = Entry::new(kind.as_str(), DEFAULT_KEY)?;

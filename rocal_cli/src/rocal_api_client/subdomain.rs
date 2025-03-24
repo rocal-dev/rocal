@@ -1,5 +1,6 @@
 use serde::Deserialize;
 
+#[allow(dead_code)]
 #[derive(Deserialize, Clone)]
 pub struct Subdomain {
     app_name: String,

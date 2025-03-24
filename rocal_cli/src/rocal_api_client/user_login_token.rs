@@ -1,5 +1,6 @@
 use serde::Deserialize;
 
+#[allow(dead_code)]
 #[derive(Deserialize, Clone)]
 pub struct UserLoginToken {
     id_token: String,
@@ -8,6 +9,7 @@ pub struct UserLoginToken {
     local_id: String,
 }
 
+#[allow(dead_code)]
 impl UserLoginToken {
     pub fn get_id_token(&self) -> &str {
         &self.id_token
