@@ -91,6 +91,7 @@ $ miniserve . --header "Cross-Origin-Opener-Policy: same-origin" --header "Cross
 Go to `http://127.0.0.1:8080/index.html` and you'll see the welcome message!
 
 6. (Optional) Publish a Rocal application:
+- You need to subscribe Basic or Developer plan to host your app on rocal platform. Run `$ rocal subscribe` command to see more detail.
 
 ```bash
 $ cd myapp
