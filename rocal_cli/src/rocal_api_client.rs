@@ -51,7 +51,7 @@ impl RocalAPIClient {
         let endpoint = if env!("BUILD_PROFILE") == "debug" {
             "http://127.0.0.1:8000"
         } else {
-            "https://www.rocal.dev"
+            "https://www.rocal.app"
         };
 
         let client = reqwest::Client::builder()

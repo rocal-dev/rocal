@@ -95,7 +95,7 @@ pub async fn publish() {
         let app_name = app_name.to_string_lossy();
         upload(&root_path.join("release.tar.gz"), &app_name, &subdomain).await;
         extract(&subdomain).await;
-        println!("Uploaded. Go to https://{}.rocal.dev", &subdomain);
+        println!("Uploaded. Go to https://{}.rocal.app", &subdomain);
     } else {
         eprintln!("Failed to upload your app (Reason: could not find your app name)");
     }
