@@ -22,3 +22,9 @@ pub fn get_user_input(label: &str) -> String {
 
     input.to_string()
 }
+
+pub fn get_user_secure_input(label: &str) -> String {
+    let secure_string = rpassword::prompt_password(&format!("Enter {}: ", label))
+        .expect(&format!("Failed to read {}", label));
+    secure_string
+}

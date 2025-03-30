@@ -68,7 +68,7 @@ impl RocalAPIClient {
         }
     }
 
-    pub async fn sign_up(&self, user: CreateUser) {
+    pub async fn sign_up(&self, user: CreateUser) -> Result<(), String> {
         let mut indicator = IndicatorLauncher::new()
             .kind(Kind::Dots)
             .interval(100)
@@ -91,19 +91,26 @@ impl RocalAPIClient {
                     token_manager::Kind::RocalAccessToken,
                     data.get_id_token(),
                 ) {
-                    eprintln!("{}", err.to_string());
+                    return Err(err.to_string());
                 }
 
                 if let Err(err) = TokenManager::set_token(
                     token_manager::Kind::RocalRefreshToken,
                     data.get_refresh_token(),
                 ) {
-                    eprintln!("{}", err.to_string());
+                    return Err(err.to_string());
                 }
+
+                Ok(())
             }
             Err(err) => {
                 let _ = indicator.stop();
-                eprintln!("{}", err);
+
+                if err == String::from("EMAIL_EXISTS") {
+                    return Err("The email has been already registered".to_string());
+                }
+
+                return Err(err);
             }
         }
     }
