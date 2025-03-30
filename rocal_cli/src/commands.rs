@@ -5,5 +5,6 @@ pub mod password;
 pub mod publish;
 pub mod register;
 pub mod subscribe;
+pub mod sync_servers;
 pub mod unsubscribe;
 pub mod utils;

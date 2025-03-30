@@ -54,15 +54,19 @@ function cacheOnly(e) {
 }
 
 function staleWhileRevalidate(ev) {
-  return caches.match(ev.request).then((cacheResponse) => {
-    let fetchResponse = fetch(ev.request).then((response) => {
-      return caches.open(version).then((cache) => {
-        cache.put(ev.request, response.clone());
-        return response;
-      });
+    return caches.match(ev.request).then((cacheResponse) => {
+	let fetchResponse = fetch(ev.request).then((response) => {
+	    if (response.ok) {
+		return caches.open(version).then((cache) => {
+		    cache.put(ev.request, response.clone());
+		    return response;
+		});		
+	    }
+
+	    return cacheResponse;
+	});
+	return cacheResponse || fetchResponse;
     });
-    return cacheResponse || fetchResponse;
-  });
 }
 
 function networkRevalidateAndCache(ev) {

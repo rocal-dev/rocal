@@ -4,6 +4,7 @@ pub mod color;
 pub mod indicator;
 pub mod list;
 pub mod open_link;
+pub mod project;
 pub mod refresh_user_token;
 
 pub fn get_user_input(label: &str) -> String {

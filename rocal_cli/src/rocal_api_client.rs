@@ -7,6 +7,7 @@ use create_user::CreateUser;
 use login_user::LoginUser;
 use oob_code_response::OobCodeResponse;
 use payment_link::PaymentLink;
+use registered_sync_server::RegisteredSyncServer;
 use reqwest::{Client, RequestBuilder};
 use send_email_verification::SendEmailVerification;
 use send_password_reset_email::SendPasswordResetEmail;
@@ -32,6 +33,7 @@ pub mod create_user;
 pub mod login_user;
 mod oob_code_response;
 mod payment_link;
+pub mod registered_sync_server;
 pub mod send_email_verification;
 pub mod send_password_reset_email;
 pub mod subdomain;
@@ -553,6 +555,42 @@ impl RocalAPIClient {
             Err(err) => {
                 let _ = indicator.stop();
                 Err(err)
+            }
+        }
+    }
+
+    pub async fn get_sync_server(&self, app_name: &str) -> Result<RegisteredSyncServer, String> {
+        let mut indicator = IndicatorLauncher::new()
+            .kind(Kind::Dots)
+            .interval(100)
+            .text("Loading...")
+            .color(Color::White)
+            .start();
+
+        let access_token = match TokenManager::get_token(token_manager::Kind::RocalAccessToken) {
+            Ok(token) => token,
+            Err(err) => {
+                let _ = indicator.stop();
+                return Err(format!("{}", err.to_string()));
+            }
+        };
+
+        match self
+            .req::<(), RegisteredSyncServer>(
+                RequestMethod::Get,
+                &format!("{}/v1/sync-servers/{}", self.endpoint, app_name),
+                None,
+                Some(&access_token),
+            )
+            .await
+        {
+            Ok(sync_server) => {
+                let _ = indicator.stop();
+                Ok(sync_server)
+            }
+            Err(err) => {
+                let _ = indicator.stop();
+                Err(err.to_string())
             }
         }
     }
