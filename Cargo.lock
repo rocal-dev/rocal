@@ -1072,7 +1072,7 @@ dependencies = [
 
 [[package]]
 name = "rocal"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "rocal-cli",
  "rocal-core",
@@ -1082,7 +1082,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-cli"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "clap",
  "flate2",
@@ -1099,7 +1099,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-core"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "js-sys",
  "proc-macro2",
@@ -1116,7 +1116,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-macro"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "proc-macro2",
  "quote",
