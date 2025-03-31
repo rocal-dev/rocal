@@ -1,6 +1,6 @@
 [package]
 name = "rocal-macro"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 
 authors = ["Yoshiki Sashiyama <yoshi@rocal.dev>"]
@@ -15,7 +15,7 @@ keywords = ["local-first", "web-framework", "macro", "wasm", "web"]
 quote = "1.0"
 syn = { version = "2.0", features = ["extra-traits"] }
 proc-macro2 = "1.0"
-rocal-core = "0.1"
+rocal-core = "0.2"
 
 [lib]
 proc-macro = true
