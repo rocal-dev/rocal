@@ -14,6 +14,8 @@ use crate::commands::utils::{
 };
 
 pub fn init(project_name: &str) {
+    let project_name = project_name.replace("-", "_");
+
     let mut indicator = IndicatorLauncher::new()
         .kind(Kind::Dots)
         .interval(100)
@@ -24,14 +26,14 @@ pub fn init(project_name: &str) {
     let output = Command::new("cargo")
         .arg("init")
         .arg("--lib")
-        .arg(project_name)
+        .arg(&project_name)
         .output()
         .expect("Failed to execute cargo init");
 
     if output.status.success() {
         let _ = indicator.stop();
 
-        env::set_current_dir(project_name).expect(&format!(
+        env::set_current_dir(&project_name).expect(&format!(
             "Failed to change a current directory: {}",
             &project_name
         ));
@@ -43,7 +45,7 @@ pub fn init(project_name: &str) {
             .color(Color::White)
             .start();
 
-        create_cargo_file(project_name);
+        create_cargo_file(&project_name);
 
         let _ = indicator.stop();
         println!("Created Cargo.toml");
@@ -146,7 +148,7 @@ pub fn init(project_name: &str) {
             .color(Color::White)
             .start();
 
-        create_entrypoint(project_name);
+        create_entrypoint(&project_name);
 
         let _ = indicator.stop();
 

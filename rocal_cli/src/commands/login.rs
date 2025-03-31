@@ -1,9 +1,9 @@
-use super::utils::get_user_input;
+use super::utils::{get_user_input, get_user_secure_input};
 use crate::rocal_api_client::{login_user::LoginUser, RocalAPIClient};
 
 pub async fn login() {
     let email = get_user_input("your email");
-    let password = get_user_input("your password");
+    let password = get_user_secure_input("your password");
 
     let client = RocalAPIClient::new();
     let user = LoginUser::new(&email, &password);

@@ -2,7 +2,7 @@ use clap::{builder::Str, command, Arg, Command, Id};
 
 use crate::commands::{
     build::build, init::init, login::login, password, publish::publish, register::register,
-    subscribe::subscribe, unsubscribe::unsubscribe,
+    subscribe::subscribe, sync_servers, unsubscribe::unsubscribe,
 };
 
 pub async fn run() {
@@ -39,9 +39,17 @@ pub async fn run() {
         .subcommand(
             Command::new(Subcommand::Password)
                 .about("Password settings")
+                .arg_required_else_help(true)
                 .subcommand(Command::new(PasswordSubcommand::Reset).about("Reset your password"))
         )
+        .subcommand(
+            Command::new(Subcommand::SyncServers)
+                .about("Manage sync servers")
+                .arg_required_else_help(true)
+                .subcommand(Command::new(SyncServersSubcommand::List).about("List available sync servers and show app_id"))
+        )
         .about("A tool to create and build a Rocal app.")
+        .arg_required_else_help(true)
         .get_matches();
 
     match matches.subcommand() {
@@ -73,6 +81,15 @@ pub async fn run() {
                 }
             } else if name == Subcommand::Unsubscribe.as_str() {
                 unsubscribe().await;
+            } else if name == Subcommand::SyncServers.as_str() {
+                match arg_matches.subcommand() {
+                    Some((name, _arg_matches)) => {
+                        if name == SyncServersSubcommand::List.as_str() {
+                            sync_servers::list().await;
+                        }
+                    }
+                    None => (),
+                }
             }
         }
         None => (),
@@ -88,6 +105,7 @@ enum Subcommand {
     Build,
     Publish,
     Password,
+    SyncServers,
 }
 
 enum PasswordSubcommand {
@@ -96,6 +114,10 @@ enum PasswordSubcommand {
 
 enum InitCommandArg {
     Name,
+}
+
+enum SyncServersSubcommand {
+    List,
 }
 
 impl Into<Str> for Subcommand {
@@ -115,6 +137,7 @@ impl Subcommand {
             Subcommand::Build => "build",
             Subcommand::Publish => "publish",
             Subcommand::Password => "password",
+            Subcommand::SyncServers => "sync-servers",
         }
     }
 }
@@ -143,6 +166,20 @@ impl PasswordSubcommand {
     pub fn as_str(self) -> &'static str {
         match self {
             PasswordSubcommand::Reset => "reset",
+        }
+    }
+}
+
+impl Into<Str> for SyncServersSubcommand {
+    fn into(self) -> Str {
+        self.as_str().into()
+    }
+}
+
+impl SyncServersSubcommand {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            SyncServersSubcommand::List => "ls",
         }
     }
 }

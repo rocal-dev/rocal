@@ -37,7 +37,8 @@ async function sync(app_id, user_id, password, directory_name, file_name, endpoi
 	const response = await fetch(endpoint, {
 	    method: "POST",
 	    headers: { "Content-Type": "application/json" },
-	    body: JSON.stringify({ app_id, user_id, password, file_name, unix_timestamp: last_modified })
+	    body: JSON.stringify({ app_id, user_id, password, file_name, unix_timestamp: last_modified }),
+	    credentials: "include"
 	});
 	
 	if (!response.ok) {

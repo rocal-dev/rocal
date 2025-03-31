@@ -4,6 +4,7 @@ pub mod color;
 pub mod indicator;
 pub mod list;
 pub mod open_link;
+pub mod project;
 pub mod refresh_user_token;
 
 pub fn get_user_input(label: &str) -> String {
@@ -20,4 +21,10 @@ pub fn get_user_input(label: &str) -> String {
     let input = input.trim();
 
     input.to_string()
+}
+
+pub fn get_user_secure_input(label: &str) -> String {
+    let secure_string = rpassword::prompt_password(&format!("Enter {}: ", label))
+        .expect(&format!("Failed to read {}", label));
+    secure_string
 }

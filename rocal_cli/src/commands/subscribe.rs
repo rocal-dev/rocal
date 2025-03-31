@@ -75,8 +75,7 @@ fn show_plans() -> Result<(), std::io::Error> {
     plan.add_text(&Color::Green.text("Basic"));
 
     let mut plan_cap = List::new();
-    plan_cap
-        .add_text("Deploy your application + compression, basic hosting, versioning, and rollback");
+    plan_cap.add_text("Deploy your application + compression, basic hosting, and versioning");
 
     let mut plan_price = List::new();
     plan_price.add_text("$10/month");

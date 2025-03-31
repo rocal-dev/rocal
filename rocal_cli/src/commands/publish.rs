@@ -18,7 +18,11 @@ use crate::{
 
 use super::{
     unsubscribe::get_subscription_status,
-    utils::{get_user_input, refresh_user_token::refresh_user_token},
+    utils::{
+        get_user_input,
+        project::{find_project_root, get_app_name},
+        refresh_user_token::refresh_user_token,
+    },
 };
 
 pub async fn publish() {
@@ -70,6 +74,10 @@ pub async fn publish() {
         "Failed to change directory to {}",
         root_path.to_str().unwrap()
     ));
+
+    if fs::exists("release").expect("Failed to check existence of release/") {
+        fs::remove_dir_all("release").expect("Failed to reset release/");
+    }
 
     let output = Command::new("wasm-pack")
         .arg("build")
@@ -187,10 +195,7 @@ async fn get_subdomain() -> Result<Option<String>, String> {
         "Failed to find a project root. Please run the command in a project built by Cargo",
     );
 
-    let app_name = root_path
-        .file_name()
-        .expect("Failed to find your app name")
-        .to_string_lossy();
+    let app_name = get_app_name(&root_path);
 
     let client = RocalAPIClient::new();
 
@@ -234,17 +239,4 @@ fn get_all_files_in(path: &PathBuf) -> std::io::Result<Vec<PathBuf>> {
     }
 
     Ok(files)
-}
-
-fn find_project_root() -> Option<PathBuf> {
-    let mut current_dir = env::current_dir().ok()?;
-    loop {
-        if current_dir.join("Cargo.toml").exists() {
-            return Some(current_dir);
-        }
-        if !current_dir.pop() {
-            break;
-        }
-    }
-    None
 }
