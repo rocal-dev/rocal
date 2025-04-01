@@ -12,7 +12,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-rocal = "0.1.0"
+rocal = "0.2"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 web-sys = {{ version = "0.3", features = [

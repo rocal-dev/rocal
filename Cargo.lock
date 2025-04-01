@@ -1072,7 +1072,7 @@ dependencies = [
 
 [[package]]
 name = "rocal"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "rocal-cli",
  "rocal-core",
