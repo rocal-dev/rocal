@@ -101,7 +101,12 @@ pub async fn publish() {
 
     if let Some(app_name) = root_path.file_name() {
         let app_name = app_name.to_string_lossy();
-        upload(&root_path.join("release.tar.gz"), &app_name, &subdomain).await;
+
+        if let Err(err) = upload(&root_path.join("release.tar.gz"), &app_name, &subdomain).await {
+            eprintln!("{}", Color::Red.text(&err));
+            return;
+        }
+
         extract(&subdomain).await;
         println!("Uploaded. Go to https://{}.rocal.app", &subdomain);
     } else {
@@ -151,6 +156,13 @@ async fn create_release_artifact(root_path: &PathBuf) {
         compress(&file, to).expect(&format!("Failed to compress {}", file.to_str().unwrap()));
     });
 
+    create_public_dir_in_release_dir();
+    if let Err(err) =
+        compress_public_dir(&root_path.join("public"), &root_path.join("release/public"))
+    {
+        panic!("{}", &err.to_string());
+    }
+
     let tar_gz = File::create("release.tar.gz").expect("Failed to create release.tar.gz");
 
     let enc = GzEncoder::new(tar_gz, Compression::default());
@@ -168,7 +180,7 @@ async fn create_release_artifact(root_path: &PathBuf) {
     println!("Generated release.tar.gz");
 }
 
-async fn upload(app_path: &PathBuf, app_name: &str, subdomain: &str) {
+async fn upload(app_path: &PathBuf, app_name: &str, subdomain: &str) -> Result<(), String> {
     let client = RocalAPIClient::new();
 
     if let Err(err) = client
@@ -178,8 +190,10 @@ async fn upload(app_path: &PathBuf, app_name: &str, subdomain: &str) {
         )
         .await
     {
-        eprintln!("{}", &err);
+        return Err(err);
     }
+
+    Ok(())
 }
 
 async fn extract(subdomain: &str) {
@@ -204,6 +218,34 @@ async fn get_subdomain() -> Result<Option<String>, String> {
         Err(err) => Err(err),
         _ => Ok(None),
     }
+}
+
+fn create_public_dir_in_release_dir() {
+    fs::create_dir_all("release/public").expect("Failed to create release/public");
+}
+
+fn compress_public_dir(lookup_path: &PathBuf, dst_path: &PathBuf) -> std::io::Result<()> {
+    for entry in fs::read_dir(&lookup_path)? {
+        let entry = entry?;
+        let path = entry.path();
+
+        if path.is_file() {
+            let to = &dst_path.join(&format!(
+                "{}.br",
+                path.file_name().unwrap().to_str().unwrap()
+            ));
+            compress(&path, to).expect(&format!("Failed to compress {}", path.to_str().unwrap()));
+        } else if path.is_dir() {
+            let dst_path = dst_path.join(path.file_name().unwrap().to_str().unwrap());
+            fs::create_dir(&dst_path).expect(&format!(
+                "Failed to create {} directory",
+                &dst_path.to_str().unwrap()
+            ));
+            compress_public_dir(&path, &dst_path)?;
+        }
+    }
+
+    Ok(())
 }
 
 async fn check_subdomain_existence(subdomain: &str) -> Result<bool, String> {

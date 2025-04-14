@@ -6,5 +6,6 @@ pub mod js_generator;
 pub mod lib_generator;
 pub mod migration_generator;
 pub mod model_generator;
+pub mod public_generator;
 pub mod template_generator;
 pub mod view_generator;

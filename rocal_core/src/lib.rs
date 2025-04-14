@@ -256,10 +256,14 @@ pub fn run_migration(item: TokenStream) -> TokenStream {
         Err(err) => return err.to_compile_error().into(),
     };
 
-    quote! {
-        match CONFIG.get_database().exec(#query).await {
-            Ok(_) => (),
-            Err(err) => web_sys::console::error_1(&err),
+    if !query.is_empty() {
+        quote! {
+            match CONFIG.get_database().exec(#query).await {
+                Ok(_) => (),
+                Err(err) => web_sys::console::error_1(&err),
+            }
         }
+    } else {
+        quote!()
     }
 }
