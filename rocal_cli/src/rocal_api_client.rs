@@ -47,6 +47,8 @@ pub struct RocalAPIClient {
 }
 
 impl RocalAPIClient {
+    const MAX_FILE_SIZE: usize = 50 * 1024 * 1024; // 50MB
+
     pub fn new() -> Self {
         let user_agent = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"));
 
@@ -398,6 +400,17 @@ impl RocalAPIClient {
             .color(Color::White)
             .start();
 
+        let file_bytes = if let Ok(bytes) = fs::read(file_path) {
+            if bytes.len() > Self::MAX_FILE_SIZE {
+                let _ = indicator.stop();
+                return Err("The size of release.tar.gz must be less than 50MB".to_string());
+            }
+            bytes
+        } else {
+            let _ = indicator.stop();
+            return Err("Could not find release.tar.gz to publish".to_string());
+        };
+
         let access_token = match TokenManager::get_token(token_manager::Kind::RocalAccessToken) {
             Ok(token) => token,
             Err(err) => {
@@ -416,13 +429,6 @@ impl RocalAPIClient {
             .await
         {
             Ok(presigned_url) => {
-                let file_bytes = if let Ok(bytes) = fs::read(file_path) {
-                    bytes
-                } else {
-                    let _ = indicator.stop();
-                    return Err("Could not find release.tar.gz to publish".to_string());
-                };
-
                 let res = match self
                     .client
                     .put(&presigned_url)

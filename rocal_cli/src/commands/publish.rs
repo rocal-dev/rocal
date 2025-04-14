@@ -101,7 +101,12 @@ pub async fn publish() {
 
     if let Some(app_name) = root_path.file_name() {
         let app_name = app_name.to_string_lossy();
-        upload(&root_path.join("release.tar.gz"), &app_name, &subdomain).await;
+
+        if let Err(err) = upload(&root_path.join("release.tar.gz"), &app_name, &subdomain).await {
+            eprintln!("{}", Color::Red.text(&err));
+            return;
+        }
+
         extract(&subdomain).await;
         println!("Uploaded. Go to https://{}.rocal.app", &subdomain);
     } else {
@@ -175,7 +180,7 @@ async fn create_release_artifact(root_path: &PathBuf) {
     println!("Generated release.tar.gz");
 }
 
-async fn upload(app_path: &PathBuf, app_name: &str, subdomain: &str) {
+async fn upload(app_path: &PathBuf, app_name: &str, subdomain: &str) -> Result<(), String> {
     let client = RocalAPIClient::new();
 
     if let Err(err) = client
@@ -185,8 +190,10 @@ async fn upload(app_path: &PathBuf, app_name: &str, subdomain: &str) {
         )
         .await
     {
-        eprintln!("{}", &err);
+        return Err(err);
     }
+
+    Ok(())
 }
 
 async fn extract(subdomain: &str) {
