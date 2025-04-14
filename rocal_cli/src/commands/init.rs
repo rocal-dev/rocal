@@ -1,5 +1,6 @@
 use std::{env, process::Command};
 
+use crate::generators::public_generator::create_public_dir;
 use crate::generators::{
     cargo_file_generator::create_cargo_file, controller_generator::create_controller_file,
     entrypoint_generator::create_entrypoint, gitignore_generator::create_gitignore,
@@ -166,6 +167,19 @@ pub fn init(project_name: &str) {
         let _ = indicator.stop();
 
         println!("Created .gitignore");
+
+        let mut indicator = IndicatorLauncher::new()
+            .kind(Kind::Dots)
+            .interval(100)
+            .text("Creating public/ directory...")
+            .color(Color::White)
+            .start();
+
+        create_public_dir();
+
+        let _ = indicator.stop();
+
+        println!("Created public/ directory");
 
         let mut indicator = IndicatorLauncher::new()
             .kind(Kind::Dots)
