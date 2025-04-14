@@ -20,11 +20,11 @@ config! {
 
 #[rocal::main]
 fn app() {
+    migrate!("db/migrations");
+
     route! {
         get "/" => { controller: RootController, action: index, view: RootView }
     }
-
-    migrate!("db/migrations");
 }
 "#;
 
