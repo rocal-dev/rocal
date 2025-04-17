@@ -7,20 +7,21 @@
 /rocal_core/target
 /rocal_macro/target
 /examples/hello_world/target
+/examples/self_checkout/target
 
 /rocal/target
-/rocal_core/target
-/rocal_macro/target
-/examples/hello_world/target
 
 /rocal/.git
 /rocal_core/.git
 /rocal_macro/.git
+/examples/hello_world/.git
+/examples/self_checkout/.git
 
 /rocal/.gitignore
 /rocal_core/.gitignore
 /rocal_macro/.gitignore
 /examples/hello_world/.gitignore
+/examples/self_checkout/.gitignore
 
 .env
 .env.debug

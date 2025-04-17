@@ -22,7 +22,8 @@ self.onmessage = async function (message) {
 			setInterval(sync, 30000, app_id, user_id, password, directory_name, file_name, endpoint, force);
 		    }
 		}
-	    } catch {}
+	    } catch {
+	    }
 	} else {
 	    console.error("OPFS not available because of your browser capability.");
 	}

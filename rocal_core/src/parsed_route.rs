@@ -11,6 +11,9 @@ use crate::enums::request_method::RequestMethod;
 mod kw {
     syn::custom_keyword!(get);
     syn::custom_keyword!(post);
+    syn::custom_keyword!(put);
+    syn::custom_keyword!(patch);
+    syn::custom_keyword!(delete);
     syn::custom_keyword!(controller);
     syn::custom_keyword!(action);
     syn::custom_keyword!(view);
@@ -91,22 +94,35 @@ impl Parse for ParsedRoute {
     fn parse(input: ParseStream) -> Result<Self, syn::Error> {
         let mut route = ParsedRoute::default();
 
-        let method = if input.peek(kw::get) || input.peek(kw::post) {
-            if input.peek(kw::get) {
-                input
-                    .parse::<kw::get>()
-                    .expect("we just checked for this token");
-                RequestMethod::Get
-            } else {
-                input
-                    .parse::<kw::post>()
-                    .expect("we just checked for this token");
-                RequestMethod::Post
-            }
+        let method = if input.peek(kw::get) {
+            input
+                .parse::<kw::get>()
+                .expect("we just checked for this token");
+            RequestMethod::Get
+        } else if input.peek(kw::post) {
+            input
+                .parse::<kw::post>()
+                .expect("we just checked for this token");
+            RequestMethod::Post
+        } else if input.peek(kw::put) {
+            input
+                .parse::<kw::put>()
+                .expect("we just checked for this token");
+            RequestMethod::Put
+        } else if input.peek(kw::patch) {
+            input
+                .parse::<kw::patch>()
+                .expect("we just checked for this token");
+            RequestMethod::Patch
+        } else if input.peek(kw::delete) {
+            input
+                .parse::<kw::delete>()
+                .expect("we just checked for this token");
+            RequestMethod::Delete
         } else {
             return Err(syn::Error::new(
                 input.span(),
-                "Method should be get or post",
+                "Method should be get, post, put, patch, or delete",
             ));
         };
 

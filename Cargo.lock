@@ -404,6 +404,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 
 [[package]]
+name = "hello_world"
+version = "0.1.0"
+dependencies = [
+ "js-sys",
+ "rocal",
+ "serde",
+ "serde-wasm-bindgen",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
 name = "http"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1072,7 +1085,7 @@ dependencies = [
 
 [[package]]
 name = "rocal"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "rocal-cli",
  "rocal-core",
@@ -1082,7 +1095,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-cli"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "clap",
  "flate2",
@@ -1099,7 +1112,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-core"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "js-sys",
  "proc-macro2",
@@ -1116,7 +1129,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-macro"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1264,6 +1277,19 @@ checksum = "49db231d56a190491cb4aeda9527f1ad45345af50b0851622a7adb8c03b01c32"
 dependencies = [
  "core-foundation-sys",
  "libc",
+]
+
+[[package]]
+name = "self-checkout"
+version = "0.1.0"
+dependencies = [
+ "js-sys",
+ "rocal",
+ "serde",
+ "serde-wasm-bindgen",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]
