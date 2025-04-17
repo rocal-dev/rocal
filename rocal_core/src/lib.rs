@@ -81,6 +81,18 @@ pub fn build_route(item: TokenStream) -> TokenStream {
                 parse_str("rocal::rocal_core::enums::request_method::RequestMethod::Post")
                     .expect("Failed to parse the enum")
             }
+            Some(RequestMethod::Put) => {
+                parse_str("rocal::rocal_core::enums::request_method::RequestMethod::Put")
+                    .expect("Failed to parse the enum")
+            }
+            Some(RequestMethod::Patch) => {
+                parse_str("rocal::rocal_core::enums::request_method::RequestMethod::Patch")
+                    .expect("Failed to parse the enum")
+            }
+            Some(RequestMethod::Delete) => {
+                parse_str("rocal::rocal_core::enums::request_method::RequestMethod::Delete")
+                    .expect("Failed to parse the enum")
+            }
             _ => panic!("Method should be get or post"),
         };
         let path = route.get_path().clone().expect("Path should be here");

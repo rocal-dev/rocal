@@ -115,9 +115,15 @@ pub trait Template {
             if let Ok(url) = Url::parse(&element.action()) {
                 let router = router_for_closure.clone();
                 spawn_local(async move {
+                    let method = RequestMethod::from(
+                        &element
+                            .get_attribute("method")
+                            .unwrap_or(String::from("post")),
+                    );
+
                     router
                         .borrow()
-                        .resolve(RequestMethod::Post, url.path(), Some(args))
+                        .resolve(method, url.path(), Some(args))
                         .await;
                 });
             }

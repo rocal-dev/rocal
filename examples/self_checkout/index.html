@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>demo</title>
+    <link rel="icon" type="image/x-icon" href="./public/favicon.ico">
+    <script src="./public/twind.js"></script>
+</head>
+<body>
+  <div class="flex w-screen h-screen justify-center">
+    <div>
+      <img src="./public/images/loading.gif" class="w-28 h-28 mt-10 block" />
+      <p class="font-bold text-center">Loading...</p>
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js');
+        }
+    });
+  </script>
+  <script src="./js/global.js"></script>
+  <script type="module">
+    import init from './pkg/demo.js';
+
+    async function main() {
+        const wasm = await init();
+    }
+
+    main();
+  </script>
+</body>
+</html>

@@ -5,7 +5,8 @@ members = [
   "rocal_macro",
   "rocal_core",
   "rocal_cli",
-#  "examples/hello_world"
+  "examples/hello_world",
+  "examples/self_checkout"
 ]
 
 [patch.crates-io]
