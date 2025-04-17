@@ -7,19 +7,22 @@ self.onmessage = async function (message) {
 	if (sqlite3.capi.sqlite3_vfs_find("opfs")) {
 	    const db = new sqlite3.oo1.OpfsDb(`${directory_name}/${file_name}`, "ct");
 	    const query = "select id, password from sync_connections order by created_at asc limit 1;";
-	    const result = db.exec(query, { rowMode: 'array' });
 
-	    if (0 < result.length && 1 < result[0].length) {
-		const user_id = result[0][0];
-		const password = result[0][1];
+	    try {
+		const result = db.exec(query, { rowMode: 'array' });
 
-		if (force !== "none") {
-		    sync(app_id, user_id, password, directory_name, file_name, endpoint, force);
-		    setInterval(sync, 30000, app_id, user_id, password, directory_name, file_name, endpoint, null);
-		} else {
-		    setInterval(sync, 30000, app_id, user_id, password, directory_name, file_name, endpoint, force);
+		if (0 < result.length && 1 < result[0].length) {
+		    const user_id = result[0][0];
+		    const password = result[0][1];
+
+		    if (force !== "none") {
+			sync(app_id, user_id, password, directory_name, file_name, endpoint, force);
+			setInterval(sync, 30000, app_id, user_id, password, directory_name, file_name, endpoint, null);
+		    } else {
+			setInterval(sync, 30000, app_id, user_id, password, directory_name, file_name, endpoint, force);
+		    }
 		}
-	    }
+	    } catch {}
 	} else {
 	    console.error("OPFS not available because of your browser capability.");
 	}
