@@ -1090,6 +1090,7 @@ dependencies = [
  "rocal-cli",
  "rocal-core",
  "rocal-macro",
+ "rocal-ui",
  "tokio",
 ]
 

@@ -6,3 +6,4 @@ pub use rocal_macro::config;
 pub use rocal_macro::main;
 pub use rocal_macro::migrate;
 pub use rocal_macro::route;
+pub use rocal_macro::view;

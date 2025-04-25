@@ -15,6 +15,7 @@ keywords = ["local-first", "web-framework", "macro", "wasm", "web"]
 rocal-macro = "0.2"
 rocal-core = "0.2"
 rocal-cli = { version = "0.2", optional = true }
+rocal-ui = "0.1"
 tokio = { version = "1", features = ["full"], optional = true }
 
 [lib]

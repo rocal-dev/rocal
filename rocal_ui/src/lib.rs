@@ -5,14 +5,12 @@ pub mod enums;
 pub mod html;
 pub mod models;
 
+use html::to_tokens::ToTokens;
 use proc_macro2::TokenStream;
 
 pub fn build_ui(item: TokenStream) -> TokenStream {
     match html::parse(item.into()) {
-        Ok(html) => {
-            eprintln!("html: {:#?}", html);
-            TokenStream::new()
-        }
+        Ok(html) => html.to_token_stream(None).into(),
         Err(err) => err.into_compile_error().into(),
     }
 }
