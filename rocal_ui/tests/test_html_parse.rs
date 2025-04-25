@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod tests {
-    use quote::quote;
+    use quote::{quote, ToTokens};
     use rocal_ui::{
         enums::html_element::HtmlElement,
-        html::{parse, Attribute, Html, Lex},
+        html::{parse, Attribute, AttributeValue, Html, Lex},
     };
 
     // ---------- helpers ----------
@@ -58,13 +58,42 @@ mod tests {
         if let Lex::Tag { attributes, .. } = &img.value() {
             let attrs: Vec<_> = attributes
                 .iter()
-                .map(|attr| (attr.key(), attr.value()))
+                .map(|attr| {
+                    let value = match attr.value() {
+                        AttributeValue::Text(text) => text,
+                        AttributeValue::Var(var) => &var.to_token_stream().to_string(),
+                    };
+                    (attr.key(), value.to_string())
+                })
                 .collect();
 
-            assert!(attrs.contains(&("src", "logo.png")));
-            assert!(attrs.contains(&("alt", "Logo")));
+            assert!(attrs.contains(&("src", "logo.png".to_string())));
+            assert!(attrs.contains(&("alt", "Logo".to_string())));
         } else {
             panic!("expected <img> tag");
+        }
+    }
+
+    #[test]
+    fn parses_attributes_including_variable() {
+        let html = parse_ok(quote! { <a href={{ url }}>{{ url }}</a> });
+
+        let a = only_child(&html);
+        if let Lex::Tag { attributes, .. } = &a.value() {
+            let attrs: Vec<_> = attributes
+                .iter()
+                .map(|attr| {
+                    let value = match attr.value() {
+                        AttributeValue::Text(text) => text,
+                        AttributeValue::Var(var) => &var.to_token_stream().to_string(),
+                    };
+                    (attr.key(), value.to_string())
+                })
+                .collect();
+
+            assert!(attrs.contains(&("href", "url".to_string())));
+        } else {
+            panic!("expected <a> tag");
         }
     }
 

@@ -1,123 +1,134 @@
 use crate::enums::html_element::HtmlElement;
 
-use super::{Html, Lex};
-use proc_macro2::{Span, TokenStream};
+use super::{AttributeValue, Html, Lex};
+use proc_macro2::{Literal, Span, TokenStream};
 use quote::quote;
 use syn::{parse_str, Expr, Ident};
 
 pub trait ToTokens {
-    fn to_token_stream(&self, html: Option<TokenStream>) -> TokenStream;
+    fn to_token_stream(&self) -> TokenStream;
 }
 
 impl ToTokens for Html {
-    fn to_token_stream(&self, html: Option<TokenStream>) -> TokenStream {
-        let mut html = if let Some(html) = html {
-            html
-        } else {
-            quote! {
+    fn to_token_stream(&self) -> TokenStream {
+        let mut stmts = Vec::<TokenStream>::new();
+        self.collect_stmts(&mut stmts);
+
+        quote! {
+            {
                 let mut html = String::new();
+                #(#stmts)*
+                html
             }
-        };
+        }
+    }
+}
 
-        let Html { children, value } = self;
-
-        let mut nested = quote!();
-
-        for child in children {
-            nested = child.to_token_stream(Some(nested));
+impl Html {
+    fn collect_stmts(&self, out: &mut Vec<TokenStream>) {
+        let mut children = Vec::<TokenStream>::new();
+        for child in &self.children {
+            child.collect_stmts(&mut children);
         }
 
-        match &value {
+        match &self.value {
             Lex::Tag {
                 element,
                 attributes,
             } => {
                 if *element != HtmlElement::Fragment {
-                    let mut attrs = String::new();
+                    let element_literal = element.to_string();
 
+                    out.push(quote! {
+                        html += "<";
+                        html += #element_literal;
+                    });
                     for attr in attributes {
-                        attrs += &format!(r#" {}="{}""#, attr.key(), attr.value());
+                        let key = attr.key();
+
+                        match attr.value() {
+                            AttributeValue::Text(text) => {
+                                let text = Literal::string(&text);
+                                out.push(quote! {
+                                    html += &format!(r#" {}="{}""#, #key, #text);
+                                });
+                            }
+                            AttributeValue::Var(var) => {
+                                out.push(quote! {
+                                    html += &format!(r#" {}="{}""#, #key, #var);
+                                });
+                            }
+                        };
                     }
 
-                    let tag = format!("<{}{}>\n", &element, &attrs);
-
-                    html = quote! {
-                        #html
-                        html += #tag;
-                    };
+                    out.push(quote! {
+                        html += ">\n";
+                    });
                 }
 
                 if !element.is_void() {
-                    html = quote! {
-                        #html
-                        #nested
-                    };
+                    for child in &self.children {
+                        child.collect_stmts(out);
+                    }
 
                     if *element != HtmlElement::Fragment {
                         let tag = format!("</{}>\n", &element);
-                        html = quote! {
-                            #html
+                        out.push(quote! {
                             html += #tag;
-                        };
+                        });
                     }
                 }
             }
             Lex::Text(text) => {
-                html = quote! {
-                    #html
+                out.push(quote! {
                     html += #text;
-                };
+                });
             }
             Lex::Var(var) => {
-                let var = Ident::new(var, Span::call_site());
-                html = quote! {
-                    #html
+                let var: Expr =
+                    parse_str(var).expect(&format!("Cannot parse the variable: {}", &var));
+
+                out.push(quote! {
                     html += #var;
-                };
+                });
             }
             Lex::If(condition) => {
                 let condition: Expr = parse_str(&condition)
                     .expect(&format!("Cannot parse the condition: {}", &condition));
 
-                html = quote! {
-                    #html
-
+                out.push(quote! {
                     if #condition {
-                        #nested
+                        #(#children)*
                     }
-                };
+                });
             }
             Lex::ElseIf(condition) => {
                 let condition: Expr = parse_str(&condition)
                     .expect(&format!("Cannot parse the condition: {}", &condition));
 
-                html = quote! {
-                    #html
+                out.push(quote! {
                     else if #condition {
-                        #nested
+                        #(#children)*
                     }
-                };
+                });
             }
             Lex::Else => {
-                html = quote! {
-                    #html
+                out.push(quote! {
                     else {
-                        #nested
+                        #(#children)*
                     }
-                };
+                });
             }
             Lex::For { var, iter } => {
                 let var = Ident::new(var, Span::call_site());
                 let iter = Ident::new(iter, Span::call_site());
 
-                html = quote! {
+                out.push(quote! {
                     for #var in #iter {
-                        #nested
+                        #(#children)*
                     }
-                };
+                });
             }
         }
-
-        html
     }
 }

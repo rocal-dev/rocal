@@ -5,7 +5,7 @@ use syn::{
     buffer::Cursor,
     parse::{Parse, ParseBuffer, ParseStream, Parser, Result},
     token::Brace,
-    Ident, LitStr, Token,
+    Expr, Ident, LitStr, Token,
 };
 
 pub mod to_tokens;
@@ -400,16 +400,33 @@ pub enum Lex {
 }
 
 #[derive(Debug, Clone)]
-pub struct Attribute(String, String);
+pub struct Attribute(String, AttributeValue);
+
+#[derive(Debug, Clone)]
+pub enum AttributeValue {
+    Text(String),
+    Var(Expr),
+}
 
 impl Parse for Attribute {
     fn parse(input: ParseStream) -> Result<Self> {
         if input.peek(Ident) {
             let key: Ident = input.parse()?;
             input.parse::<Token![=]>()?;
-            let value: LitStr = input.parse()?;
 
-            return Ok(Attribute(key.to_string(), value.value()));
+            if input.peek(Brace) {
+                let mut value;
+                braced!(value in input);
+                braced!(value in value);
+                let value: Expr = value.parse()?;
+                return Ok(Attribute(key.to_string(), AttributeValue::Var(value)));
+            }
+
+            let value: LitStr = input.parse()?;
+            return Ok(Attribute(
+                key.to_string(),
+                AttributeValue::Text(value.value()),
+            ));
         }
 
         Err(syn::Error::new(
@@ -423,7 +440,7 @@ impl Attribute {
     pub fn key(&self) -> &str {
         &self.0
     }
-    pub fn value(&self) -> &str {
+    pub fn value(&self) -> &AttributeValue {
         &self.1
     }
 }
