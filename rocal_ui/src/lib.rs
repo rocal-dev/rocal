@@ -3,6 +3,7 @@
 pub mod data_types;
 pub mod enums;
 pub mod html;
+pub mod html5;
 pub mod models;
 
 use html::to_tokens::ToTokens;
