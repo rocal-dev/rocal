@@ -1,222 +1,429 @@
-use std::{cell::RefCell, rc::Rc, str::FromStr};
-
-use crate::{
-    data_types::queue::Queue, enums::html_element::HtmlElement, html2::Html2, lexer::Lexer,
-    models::html_node::Node,
-};
-use proc_macro2::{TokenStream, TokenTree};
+use crate::{data_types::stack::Stack, enums::html_element::HtmlElement};
+use proc_macro2::{Delimiter, TokenStream, TokenTree};
 use syn::{
-    parse::{Parse, ParseStream},
+    braced,
+    buffer::Cursor,
+    parse::{Parse, ParseBuffer, ParseStream, Parser, Result},
+    token::Brace,
     Ident, LitStr, Token,
 };
 
-pub fn parse_html(item: TokenStream) -> Result<Html, syn::Error> {
-    let result: Html = syn::parse2(item.into())?;
-    Ok(result)
+pub mod to_tokens;
+
+pub fn parse(item: TokenStream) -> Result<Html> {
+    Ok(syn::parse2(item.into())?)
 }
 
-pub fn lex_html(item: TokenStream) -> Result<Lexer, syn::Error> {
-    let result: Lexer = syn::parse2(item.into())?;
-    Ok(result)
-}
-
-pub fn parse_html2(item: TokenStream) -> Result<Html2, syn::Error> {
-    let result: Html2 = syn::parse2(item.into())?;
-    Ok(result)
-}
-
+#[derive(Clone, Debug)]
 pub struct Html {
-    root: Node,
-}
-
-impl Html {
-    pub fn new(root: Node) -> Self {
-        Self { root }
-    }
-
-    pub fn get_root(&self) -> &Node {
-        &self.root
-    }
+    children: Vec<Html>,
+    value: Lex,
 }
 
 impl Parse for Html {
-    fn parse(input: ParseStream) -> Result<Self, syn::Error> {
-        let tag: Tag = input.parse()?;
-        let root = Node::Element {
-            element: tag.element.clone(),
-            attributes: tag
-                .attributes
-                .iter()
-                .map(|attr| (attr.key.to_string(), attr.value.to_string()))
-                .collect(),
+    fn parse(input: ParseStream) -> Result<Self> {
+        let mut root = Html {
             children: vec![],
+            value: Lex::Tag {
+                element: HtmlElement::Fragment,
+                attributes: vec![],
+            },
         };
-        let pointer = Rc::new(RefCell::new(&root));
-        let mut queue: Queue<Tag> = Queue::new();
-        queue.enqueue(tag);
-
-        while let Some(tag) = queue.dequeue() {
-            for child in &tag.children {
-                let tag: Tag = syn::parse2(child.clone())?;
-                queue.enqueue(tag);
-            }
-        }
-
-        Ok(Html::new(Node::Text(String::new())))
+        Ok(Self::parse_html(&input, &mut root)?)
     }
 }
 
-#[derive(Debug, Clone)]
-struct Tag {
-    element: HtmlElement,
-    attributes: Vec<Attribute>,
-    children: Vec<TokenStream>,
-}
-
-impl Tag {
-    pub fn new(element: HtmlElement, attributes: Vec<Attribute>) -> Self {
-        Self {
-            element,
-            attributes,
-            children: vec![],
-        }
+impl Html {
+    pub fn children(&self) -> &Vec<Html> {
+        &self.children
     }
-}
 
-impl Tag {
-    fn parse_opening_tag(input: &ParseStream) -> Result<Self, syn::Error> {
-        if input.peek(Token![>]) {
-            let _: Token![>] = input.parse()?;
-            return Ok(Tag::new(HtmlElement::Fragment, vec![]));
-        };
-
-        if input.peek(Ident) {
-            let element: HtmlElement = input.parse()?;
-            let mut attrs: Vec<Attribute> = vec![];
-
-            while !input.peek(Token![>]) {
-                if input.peek(Ident) {
-                    let attr: Attribute = input.parse()?;
-                    attrs.push(attr);
-                }
-            }
-
-            return Ok(Tag::new(element, attrs));
-        }
-
-        Ok(Tag::new(HtmlElement::Fragment, vec![]))
+    pub fn value(&self) -> &Lex {
+        &self.value
     }
-}
 
-impl Parse for Tag {
-    fn parse(input: ParseStream) -> Result<Self, syn::Error> {
-        let mut children = String::new();
+    fn parse_html(input: &ParseStream, html: &mut Html) -> Result<Html> {
+        if input.is_empty() {
+            return Ok(html.clone());
+        }
 
         if input.peek(Token![<]) {
-            let _: Token![<] = input.parse()?;
+            input.parse::<Token![<]>()?;
 
-            let mut tag = Self::parse_opening_tag(&input)?;
+            if input.peek(Ident) {
+                let element: HtmlElement = input.parse()?;
+                let mut attrs: Vec<Attribute> = vec![];
 
-            let _: Token![>] = input.parse()?;
-
-            let _ = input.step(|cur| {
-                let mut rest = *cur;
-
-                while let Some((tt, next)) = rest.token_tree() {
-                    match &tt {
-                        TokenTree::Punct(p) if p.as_char() == '<' => {
-                            if let Some((tt2, next2)) = next.token_tree() {
-                                match &tt2 {
-                                    TokenTree::Punct(p) if p.as_char() == '/' => {
-                                        if let Some((tt3, next3)) = next2.token_tree() {
-                                            match &tt3 {
-                                                TokenTree::Ident(i)
-                                                    if i.to_string() == tag.element.to_string() =>
-                                                {
-                                                    if let Some((tt4, next4)) = next3.token_tree() {
-                                                        match &tt4 {
-                                                            TokenTree::Punct(p)
-                                                                if p.as_char() == '>' =>
-                                                            {
-                                                                return Ok(((), next4));
-                                                            }
-                                                            _ => {
-                                                                children += &tt.to_string();
-                                                                children += &tt2.to_string();
-                                                                children += &tt3.to_string();
-                                                                children += &tt4.to_string();
-                                                                rest = next4;
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                _ => {
-                                                    children += &tt.to_string();
-                                                    children += &tt2.to_string();
-                                                    children += &tt3.to_string();
-                                                    rest = next3;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    _ => {
-                                        children += &tt.to_string();
-                                        children += &tt2.to_string();
-                                        rest = next2;
-                                    }
-                                }
-                            }
-                        }
-                        _ => {
-                            children += &tt.to_string();
-                            rest = next;
-                        }
+                while !(input.peek(Token![>]) || input.peek(Token![/])) {
+                    if input.peek(Ident) {
+                        let attr: Attribute = input.parse()?;
+                        attrs.push(attr);
                     }
                 }
 
-                Err(cur.error(&format!("expected `</{}>`", tag.element)))
-            })?;
+                if input.peek(Token![/]) {
+                    input.parse::<Token![/]>()?;
+                }
 
-            tag.children.push(TokenStream::from_str(&children)?);
+                input.parse::<Token![>]>()?;
 
-            Ok(tag)
+                if element.is_void() {
+                    html.children.push(Html {
+                        children: vec![],
+                        value: Lex::Tag {
+                            element,
+                            attributes: attrs,
+                        },
+                    });
+                } else {
+                    let next_input = Self::get_next_input(&input, &element)?;
+
+                    let mut new_html = Html {
+                        children: vec![],
+                        value: Lex::Tag {
+                            element,
+                            attributes: attrs,
+                        },
+                    };
+
+                    if let Some(next_input) = next_input {
+                        let parser = |input: ParseStream| Self::parse_html(&input, &mut new_html);
+                        parser.parse2(next_input)?;
+                    }
+
+                    html.children.push(new_html);
+                }
+            } else {
+                return Err(syn::Error::new(input.span(), "The syntax is invalid"));
+            }
+        } else if input.peek(Brace) {
+            let mut content;
+            braced!(content in input);
+
+            if let Ok(content) = content.parse::<LitStr>() {
+                html.children.push(Html {
+                    children: vec![],
+                    value: Lex::Text(content.value()),
+                });
+            } else {
+                braced!(content in content);
+                let variable = Self::extract_variable(&content)?;
+                html.children.push(Html {
+                    children: vec![],
+                    value: Lex::Var(variable),
+                })
+            }
+        } else if input.peek(Token![if]) {
+            input.parse::<Token![if]>()?;
+
+            let condition = Self::extract_condition(input)?;
+
+            let next_input;
+            braced!(next_input in input);
+
+            let next_input: ParseStream = &next_input;
+
+            let mut new_html = Html {
+                children: vec![],
+                value: Lex::If(condition.to_string()),
+            };
+
+            Self::parse_html(&next_input, &mut new_html)?;
+
+            html.children.push(new_html);
+        } else if input.peek(Token![else]) {
+            input.parse::<Token![else]>()?;
+
+            let mut new_html = if input.peek(Token![if]) {
+                input.parse::<Token![if]>()?;
+
+                let condition = Self::extract_condition(input)?;
+                Html {
+                    children: vec![],
+                    value: Lex::ElseIf(condition.to_string()),
+                }
+            } else {
+                Html {
+                    children: vec![],
+                    value: Lex::Else,
+                }
+            };
+
+            let next_input;
+            braced!(next_input in input);
+
+            let next_input: ParseStream = &next_input;
+
+            Self::parse_html(&next_input, &mut new_html)?;
+
+            html.children.push(new_html);
+        } else if input.peek(Token![for]) {
+            input.parse::<Token![for]>()?;
+
+            let var: Ident = input.parse()?;
+
+            input.parse::<Token![in]>()?;
+
+            let iter: Ident = input.parse()?;
+
+            let next_input;
+            braced!(next_input in input);
+
+            let mut new_html = Html {
+                children: vec![],
+                value: Lex::For {
+                    iter: iter.to_string(),
+                    var: var.to_string(),
+                },
+            };
+
+            Self::parse_html(&&next_input, &mut new_html)?;
+
+            html.children.push(new_html);
         } else {
-            return Err(syn::Error::new(
-                input.span(),
-                "The macro always requires a single root node",
-            ));
+            return Err(syn::Error::new(input.span(), "The token is invalid"));
         }
+
+        Self::parse_html(input, html)?;
+
+        Ok(html.clone())
+    }
+
+    fn extract_variable(input: &ParseBuffer) -> Result<String> {
+        let variable = input.step(|cursor| {
+            let result: Result<(String, Cursor)> = {
+                let mut rest = *cursor;
+                let mut tokens = String::new();
+
+                while let Some((tt, next)) = rest.token_tree() {
+                    tokens += &tt.to_string();
+                    rest = next;
+                }
+
+                Ok((tokens, rest))
+            };
+
+            result
+        })?;
+
+        Ok(variable)
+    }
+
+    fn extract_condition(input: ParseStream) -> Result<TokenStream> {
+        let condition = input.step(|cursor| {
+            let result: Result<(TokenStream, Cursor)> = {
+                let mut rest = *cursor;
+                let mut tokens: Vec<TokenTree> = vec![];
+
+                while let Some((tt, next)) = rest.token_tree() {
+                    if let TokenTree::Group(g) = &tt {
+                        if g.delimiter() == Delimiter::Brace {
+                            return Ok((tokens.into_iter().collect(), rest));
+                        }
+                    }
+
+                    tokens.push(tt);
+                    rest = next;
+                }
+
+                if tokens.is_empty() {
+                    Err(syn::Error::new(input.span(), "Condition shuold be here."))
+                } else {
+                    Ok((tokens.into_iter().collect(), *cursor))
+                }
+            };
+
+            result
+        });
+
+        condition
+    }
+
+    fn get_next_input(input: &ParseStream, element: &HtmlElement) -> Result<Option<TokenStream>> {
+        let mut opening_tags: Stack<HtmlElement> = Stack::new();
+
+        let next_input = input.step(|cursor| {
+            let result: Result<(Option<TokenStream>, Cursor)> = {
+                let mut rest = *cursor;
+                let mut tokens: Vec<TokenTree> = vec![];
+
+                while let Some((tt, next)) = rest.token_tree() {
+                    let punct = if let TokenTree::Punct(p) = &tt {
+                        p
+                    } else {
+                        tokens.push(tt.clone());
+                        rest = next;
+                        continue;
+                    };
+
+                    if punct.as_char() != '<' {
+                        tokens.push(tt.clone());
+                        rest = next;
+                        continue;
+                    }
+
+                    let (tt2, next2) = if let Some((tt2, next2)) = next.token_tree() {
+                        (tt2, next2)
+                    } else {
+                        tokens.push(tt.clone());
+                        rest = next;
+                        continue;
+                    };
+
+                    if let TokenTree::Ident(i) = &tt2 {
+                        if let Some(el) = HtmlElement::from_str(&i.to_string()) {
+                            opening_tags.push(el.clone());
+                        }
+                    }
+
+                    let punct = if let TokenTree::Punct(p) = &tt2 {
+                        p
+                    } else {
+                        tokens.push(tt.clone());
+                        tokens.push(tt2.clone());
+                        rest = next2;
+                        continue;
+                    };
+
+                    if punct.as_char() != '/' {
+                        tokens.push(tt.clone());
+                        tokens.push(tt2.clone());
+                        rest = next2;
+                        continue;
+                    }
+
+                    let (tt3, next3) = if let Some((tt3, next3)) = next2.token_tree() {
+                        (tt3, next3)
+                    } else {
+                        tokens.push(tt.clone());
+                        tokens.push(tt2.clone());
+                        rest = next2;
+                        continue;
+                    };
+
+                    let ident = if let TokenTree::Ident(i) = &tt3 {
+                        i
+                    } else {
+                        tokens.push(tt.clone());
+                        tokens.push(tt2.clone());
+                        tokens.push(tt3.clone());
+                        rest = next3;
+                        continue;
+                    };
+
+                    if ident.to_string() != element.to_string() {
+                        tokens.push(tt.clone());
+                        tokens.push(tt2.clone());
+                        tokens.push(tt3.clone());
+                        rest = next3;
+                        continue;
+                    }
+
+                    let (tt4, next4) = if let Some((tt4, next4)) = next3.token_tree() {
+                        (tt4, next4)
+                    } else {
+                        tokens.push(tt.clone());
+                        tokens.push(tt2.clone());
+                        tokens.push(tt3.clone());
+                        rest = next3;
+                        continue;
+                    };
+
+                    let punct = if let TokenTree::Punct(p) = &tt4 {
+                        p
+                    } else {
+                        tokens.push(tt.clone());
+                        tokens.push(tt2.clone());
+                        tokens.push(tt3.clone());
+                        tokens.push(tt4.clone());
+                        rest = next4;
+                        continue;
+                    };
+
+                    if punct.as_char() != '>' {
+                        tokens.push(tt.clone());
+                        tokens.push(tt2.clone());
+                        tokens.push(tt3.clone());
+                        tokens.push(tt4.clone());
+                        rest = next4;
+                        continue;
+                    }
+
+                    if let Some(opening_tag) = opening_tags.peek() {
+                        if opening_tag.to_string() == ident.to_string() {
+                            opening_tags.pop();
+                            tokens.push(tt.clone());
+                            tokens.push(tt2.clone());
+                            tokens.push(tt3.clone());
+                            tokens.push(tt4.clone());
+                            rest = next4;
+                            continue;
+                        }
+                    }
+
+                    if tokens.is_empty() {
+                        return Ok((None, next4));
+                    } else {
+                        return Ok((Some(tokens.into_iter().collect()), next4));
+                    }
+                }
+
+                if tokens.is_empty() {
+                    Ok((None, rest))
+                } else {
+                    Ok((Some(tokens.into_iter().collect()), rest))
+                }
+            };
+
+            return result;
+        })?;
+
+        Ok(next_input)
     }
 }
 
 #[derive(Debug, Clone)]
-struct Attribute {
-    key: String,
-    value: String,
+pub enum Lex {
+    Tag {
+        element: HtmlElement,
+        attributes: Vec<Attribute>,
+    },
+    Text(String),
+    Var(String),
+    If(String),
+    ElseIf(String),
+    Else,
+    For {
+        var: String,
+        iter: String,
+    },
 }
 
-impl Attribute {
-    pub fn new(key: &str, value: &str) -> Self {
-        Self {
-            key: key.to_string(),
-            value: value.to_string(),
+#[derive(Debug, Clone)]
+pub struct Attribute(String, String);
+
+impl Parse for Attribute {
+    fn parse(input: ParseStream) -> Result<Self> {
+        if input.peek(Ident) {
+            let key: Ident = input.parse()?;
+            input.parse::<Token![=]>()?;
+            let value: LitStr = input.parse()?;
+
+            return Ok(Attribute(key.to_string(), value.value()));
         }
+
+        Err(syn::Error::new(
+            input.span(),
+            "Some attributes should be here.",
+        ))
     }
 }
 
-impl Parse for Attribute {
-    fn parse(input: ParseStream) -> Result<Self, syn::Error> {
-        if input.peek(Ident) {
-            let key: Ident = input.parse()?;
-            let _: Token![=] = input.parse()?;
-            let value: LitStr = input.parse()?;
-
-            return Ok(Attribute::new(&key.to_string(), &value.value()));
-        }
-
-        return Err(syn::Error::new(
-            input.span(),
-            "Some attributes should be here.",
-        ));
+impl Attribute {
+    pub fn key(&self) -> &str {
+        &self.0
+    }
+    pub fn value(&self) -> &str {
+        &self.1
     }
 }
