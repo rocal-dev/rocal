@@ -4,12 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 authors = ["Yoshiki Sashiyama <yoshi@rocal.dev>"]
-description = "UI for local-first-development driven web application framework"
+description = "UI for Rocal - Full-Stack WASM framework"
 license = "MIT"
 homepage = "https://github.com/rocal-dev/rocal"
 repository = "https://github.com/rocal-dev/rocal"
 readme = "README.md"
-keywords = ["local-first", "web-framework", "macro", "wasm", "web"]
+keywords = ["template-engine", "web-framework", "macro", "wasm", "web"]
 
 [dependencies]
 quote = "1.0"

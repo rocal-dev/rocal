@@ -143,6 +143,7 @@ impl HtmlElement {
         HtmlElement::Wbr,
     ];
 
+    #[allow(dead_code)]
     const OPTIONAL_CLOSING_ELEMENTS: [HtmlElement; 15] = [
         HtmlElement::Html,
         HtmlElement::Head,

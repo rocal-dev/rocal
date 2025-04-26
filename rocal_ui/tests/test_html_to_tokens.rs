@@ -9,7 +9,7 @@ mod tests {
     //!      (opening/closing tags, attributes, flow-control keywords, …)
 
     use quote::quote;
-    use rocal_ui::html5::{parse, to_tokens::ToTokens};
+    use rocal_ui::html::{parse, to_tokens::ToTokens};
 
     /// Convenience: parse and immediately stringify the generated tokens.
     fn gen(src: proc_macro2::TokenStream) -> String {

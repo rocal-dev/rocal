@@ -3,7 +3,7 @@ mod tests {
     use quote::{quote, ToTokens};
     use rocal_ui::{
         enums::html_element::HtmlElement,
-        html5::{parse, AttributeValue, Html5 as Html, Lex},
+        html::{parse, AttributeValue, Html, Lex},
     };
 
     // ---------- helpers ----------

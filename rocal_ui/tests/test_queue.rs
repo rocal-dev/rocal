@@ -45,6 +45,7 @@ mod tests {
 
     #[derive(Clone)]
     struct Obj {
+        #[allow(dead_code)]
         id: u32,
     }
 }
