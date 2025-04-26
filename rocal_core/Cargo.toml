@@ -1,10 +1,10 @@
 [package]
 name = "rocal-core"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 
 authors = ["Yoshiki Sashiyama <yoshi@rocal.dev>"]
-description = "Core for local-first-development driven web application framework"
+description = "Core for Rocal - Full-Stack WASM framework"
 license = "MIT"
 homepage = "https://github.com/rocal-dev/rocal"
 repository = "https://github.com/rocal-dev/rocal"
