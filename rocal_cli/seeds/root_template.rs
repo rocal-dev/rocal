@@ -2,9 +2,11 @@ use rocal::{
     rocal_core::traits::{SharedRouter, Template},
     view,
 };
+
 pub struct RootTemplate {
     router: SharedRouter,
 }
+
 impl Template for RootTemplate {
     type Data = String;
 
@@ -16,7 +18,6 @@ impl Template for RootTemplate {
         view! {
             <h1>{"Welcome to rocal world!"}</h1>
             <p>{{ &data }}</p>
-            <p><a href="#/sync-connections">{"Sync settings"}</a></p>
         }
     }
 

@@ -1,10 +1,10 @@
 [package]
 name = "rocal"
-version = "0.2.3"
+version = "0.2.4"
 edition = "2021"
 
 authors = ["Yoshiki Sashiyama <yoshi@rocal.dev>"]
-description = "Local-first-development driven web application framework"
+description = "Full-Stack WASM framework"
 license = "MIT"
 homepage = "https://github.com/rocal-dev/rocal"
 repository = "https://github.com/rocal-dev/rocal"
@@ -15,6 +15,7 @@ keywords = ["local-first", "web-framework", "macro", "wasm", "web"]
 rocal-macro = "0.2"
 rocal-core = "0.2"
 rocal-cli = { version = "0.2", optional = true }
+rocal-ui = "0.1"
 tokio = { version = "1", features = ["full"], optional = true }
 
 [lib]

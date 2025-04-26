@@ -2,6 +2,7 @@
 
 use proc_macro::TokenStream;
 use rocal_core::{build_action, build_config, build_route, run_migration, start_app};
+use rocal_ui::build_ui;
 
 /// This attribute macro should be used when you create an entrypoint of a Rocal application.
 ///
@@ -71,7 +72,7 @@ pub fn route(item: TokenStream) -> TokenStream {
 ///     database_directory_name: "local" ,
 ///     database_file_name: "local.sqlite3"
 /// }
-///
+/// ```
 #[proc_macro]
 pub fn config(item: TokenStream) -> TokenStream {
     build_config(item.into()).into()
@@ -85,4 +86,26 @@ pub fn config(item: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn migrate(item: TokenStream) -> TokenStream {
     run_migration(item.into()).into()
+}
+
+/// This function-like macro generates code to produce HTML string.
+///
+/// ```rust
+/// view! {
+///   <div class="container">
+///     <h1 class="title">{"Hello, World!"}</h1>
+///     if true {
+///        <p>{"This is how you can use this macro"}</p>
+///     } else {
+///        <p>{"Even you can use if-else condition control"}</p>
+///     }
+///     for item in items {
+///        <p>{{ item.id }}{"Maybe, you also want to use for-loop."}</p>
+///     }
+///   </div>
+/// }
+/// ```
+#[proc_macro]
+pub fn view(item: TokenStream) -> TokenStream {
+    build_ui(item.into()).into()
 }
