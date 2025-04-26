@@ -28,6 +28,15 @@ mod tests {
     }
 
     #[test]
+    fn simple_button_and_text() {
+        let out = gen(
+            quote! { <button type="submit" class="w-full h-full cursor-pointer">{ "Submit" }</button> },
+        );
+
+        assert!(out.contains("Submit"));
+    }
+
+    #[test]
     fn void_tag_br_inside_paragraph() {
         let out = gen(quote! { <p>{ "Break" }<br />{ "next" }</p> });
 

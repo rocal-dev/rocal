@@ -50,7 +50,7 @@ impl Parse for Html5 {
                 let mut attrs: Vec<Attribute> = vec![];
 
                 while !(input.peek(Token![>]) || input.peek(Token![/])) {
-                    if input.peek(Ident) {
+                    if input.peek(Ident) || input.peek(Token![type]) {
                         let attr: Attribute = input.parse()?;
                         attrs.push(attr);
                     }
@@ -221,7 +221,7 @@ impl Parse for Html5 {
 
                 input.parse::<Token![in]>()?;
 
-                let iter: Ident = input.parse()?;
+                let iter = Self::extract_iter(input)?;
 
                 let body;
                 braced!(body in input);
@@ -287,6 +287,36 @@ impl Html5 {
         Ok(variable)
     }
 
+    fn extract_iter(input: ParseStream) -> Result<TokenStream> {
+        let iter = input.step(|cursor| {
+            let result: Result<(TokenStream, Cursor)> = {
+                let mut rest = *cursor;
+                let mut tokens: Vec<TokenTree> = vec![];
+
+                while let Some((tt, next)) = rest.token_tree() {
+                    if let TokenTree::Group(g) = &tt {
+                        if g.delimiter() == Delimiter::Brace {
+                            return Ok((tokens.into_iter().collect(), rest));
+                        }
+                    }
+
+                    tokens.push(tt);
+                    rest = next;
+                }
+
+                if tokens.is_empty() {
+                    Err(syn::Error::new(input.span(), "Iter should be here."))
+                } else {
+                    Ok((tokens.into_iter().collect(), *cursor))
+                }
+            };
+
+            result
+        });
+
+        iter
+    }
+
     fn extract_condition(input: ParseStream) -> Result<TokenStream> {
         let condition = input.step(|cursor| {
             let result: Result<(TokenStream, Cursor)> = {
@@ -346,29 +376,31 @@ pub enum AttributeValue {
 
 impl Parse for Attribute {
     fn parse(input: ParseStream) -> Result<Self> {
-        if input.peek(Ident) {
+        let key = if input.peek(Ident) {
             let key: Ident = input.parse()?;
-            input.parse::<Token![=]>()?;
-
-            if input.peek(Brace) {
-                let mut value;
-                braced!(value in input);
-                braced!(value in value);
-                let value: Expr = value.parse()?;
-                return Ok(Attribute(key.to_string(), AttributeValue::Var(value)));
-            }
-
-            let value: LitStr = input.parse()?;
-            return Ok(Attribute(
-                key.to_string(),
-                AttributeValue::Text(value.value()),
+            key.to_string()
+        } else if input.peek(Token![type]) {
+            input.parse::<Token![type]>()?;
+            "type".to_string()
+        } else {
+            return Err(syn::Error::new(
+                input.span(),
+                "Some attributes should be here.",
             ));
+        };
+
+        input.parse::<Token![=]>()?;
+
+        if input.peek(Brace) {
+            let mut value;
+            braced!(value in input);
+            braced!(value in value);
+            let value: Expr = value.parse()?;
+            return Ok(Attribute(key, AttributeValue::Var(value)));
         }
 
-        Err(syn::Error::new(
-            input.span(),
-            "Some attributes should be here.",
-        ))
+        let value: LitStr = input.parse()?;
+        return Ok(Attribute(key, AttributeValue::Text(value.value())));
     }
 }
 

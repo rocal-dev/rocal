@@ -121,7 +121,8 @@ impl Html {
             }
             Lex::For { var, iter } => {
                 let var = Ident::new(var, Span::call_site());
-                let iter = Ident::new(iter, Span::call_site());
+                let iter: Expr =
+                    parse_str(&iter).expect(&format!("Cannot parse the iter: {}", &iter));
 
                 out.push(quote! {
                     for #var in #iter {
