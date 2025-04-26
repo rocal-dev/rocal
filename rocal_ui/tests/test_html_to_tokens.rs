@@ -118,7 +118,8 @@ mod tests {
     fn variable_interpolation_emits_plain_ident() {
         let out = gen(quote! { <p>{{ name }}</p> });
 
-        assert!(out.contains("html += name"));
+        assert!(out.contains("push_str"));
+        assert!(out.contains("(name)"));
     }
 
     #[test]

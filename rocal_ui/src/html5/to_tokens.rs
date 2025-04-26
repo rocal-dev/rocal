@@ -16,6 +16,7 @@ impl ToTokens for Html {
 
         quote! {
             {
+                use std::fmt::Write;
                 let mut html = String::new();
                 #(#stmts)*
                 html
@@ -40,8 +41,8 @@ impl Html {
                     let element_literal = element.to_string();
 
                     out.push(quote! {
-                        html += "<";
-                        html += #element_literal;
+                        html.push_str("<");
+                        html.push_str(#element_literal);
                     });
                     for attr in attributes {
                         let key = attr.key();
@@ -50,19 +51,19 @@ impl Html {
                             AttributeValue::Text(text) => {
                                 let text = Literal::string(&text);
                                 out.push(quote! {
-                                    html += &format!(r#" {}="{}""#, #key, #text);
+                                    write!(html, r#" {}="{}""#, #key, #text).unwrap();
                                 });
                             }
                             AttributeValue::Var(var) => {
                                 out.push(quote! {
-                                    html += &format!(r#" {}="{}""#, #key, #var);
+                                    write!(html, r#" {}="{}""#, #key, #var).unwrap();
                                 });
                             }
                         };
                     }
 
                     out.push(quote! {
-                        html += ">\n";
+                        html.push_str(">\n");
                     });
                 }
 
@@ -74,7 +75,7 @@ impl Html {
                     if *element != HtmlElement::Fragment {
                         let tag = format!("</{}>\n", &element);
                         out.push(quote! {
-                            html += #tag;
+                            html.push_str(#tag);
                         });
                     }
                 }
@@ -89,7 +90,7 @@ impl Html {
                     parse_str(var).expect(&format!("Cannot parse the variable: {}", &var));
 
                 out.push(quote! {
-                    html += #var;
+                    html.push_str(#var);
                 });
             }
             Lex::If(condition) => {
