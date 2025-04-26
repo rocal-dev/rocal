@@ -75,6 +75,15 @@ view! {
 
 On top of that, so `{{ variable }}` can take any expression that emits `&str` of Rust, if you want to do string interpolation, you can write like `{{ &format!("Hi, {}", name) }}`.
 
-Links:
+## How to install
+
+(if you have not had `cargo` yet, follow [this link](https://doc.rust-lang.org/cargo/getting-started/installation.html) first)
+```bash
+$ cargo install rocal --features="cli"
+$ rocal new -n yourapp
+```
+Then in `yourapp/src/templates/root_template.rs`, you could see an example of usage of Rocal UI
+
+## Links
 - [GitHub](https://github.com/rocal-dev/rocal) I'd appreciate it if you could star it.
 - [Download](https://crates.io/crates/rocal-ui)
