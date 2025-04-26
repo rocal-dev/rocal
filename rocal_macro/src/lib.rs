@@ -88,7 +88,7 @@ pub fn migrate(item: TokenStream) -> TokenStream {
     run_migration(item.into()).into()
 }
 
-/// This function-like macro generates code to create HTML.
+/// This function-like macro generates code to produce HTML string.
 ///
 /// ```rust
 /// view! {
