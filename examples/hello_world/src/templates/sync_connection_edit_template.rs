@@ -1,4 +1,7 @@
-use rocal::rocal_core::traits::{SharedRouter, Template};
+use rocal::{
+    rocal_core::traits::{SharedRouter, Template},
+    view,
+};
 
 use crate::models::sync_connection::SyncConnection;
 
@@ -14,21 +17,19 @@ impl Template for SyncConnectionEditTemplate {
     }
 
     fn body(&self, data: Self::Data) -> String {
-        let mut html = String::from("<h1>DB sync connection</h1>");
+        view! {
+            <h1>{"DB sync connection"}</h1>
+            if let Some(connection) = data {
+                <p>{{ connection.get_id() }} {" has been already connected."}</p>
+            } else {
+                <form action="/sync-connections">
+                    <p><input type="text" name="id" placeholder="ID"></p>
+                    <p><input type="password" name="password" placeholder="Password"></p>
+                    <p><button type="submit">{"Connect"}</button></p>
+                </form>
+            }
 
-        if let Some(connection) = data {
-            html += &format!("<p>{} has been already connected.</p>", connection.get_id());
-        } else {
-            html += "
-              <form action='/sync-connections'>
-                <p><input type='text' name='id' placeholder='ID'></p>
-                <p><input type='password' name='password' placeholder='Password'></p>
-                <p><button type='submit'>Connect</button></p>
-              </form>
-            ";
         }
-
-        html
     }
 
     fn router(&self) -> SharedRouter {
