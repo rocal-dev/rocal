@@ -1,11 +1,11 @@
 [package]
 name = "rocal-cli"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 build = "build.rs"
 
 authors = ["Yoshiki Sashiyama <yoshi@rocal.dev>"]
-description = "CLI tool for local-first-development driven web application framework"
+description = "CLI tool for Rocal - Full-Stack WASM framework"
 license = "MIT"
 homepage = "https://github.com/rocal-dev/rocal"
 repository = "https://github.com/rocal-dev/rocal"

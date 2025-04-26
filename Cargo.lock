@@ -1085,7 +1085,7 @@ dependencies = [
 
 [[package]]
 name = "rocal"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "rocal-cli",
  "rocal-core",
@@ -1096,7 +1096,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-cli"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "clap",
  "flate2",
