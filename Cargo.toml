@@ -6,6 +6,7 @@ members = [
   "rocal_core",
   "rocal_cli",
   "rocal_ui",
+  "rocal_dev_server",
   "examples/hello_world",
   "examples/self_checkout"
 ]
@@ -16,3 +17,4 @@ rocal-cli = { path = "rocal_cli", optional = true }
 rocal-core = { path = "rocal_core" }
 rocal-macro = { path = "rocal_macro" }
 rocal-ui = { path = "rocal_ui" }
+rocal-dev-server = { path = "rocal_dev_server" }

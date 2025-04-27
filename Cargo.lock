@@ -1096,13 +1096,14 @@ dependencies = [
 
 [[package]]
 name = "rocal-cli"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "clap",
  "flate2",
  "keyring",
  "quote",
  "reqwest",
+ "rocal-dev-server",
  "rpassword",
  "serde",
  "syn",
@@ -1127,6 +1128,10 @@ dependencies = [
  "wasm-bindgen-futures",
  "web-sys",
 ]
+
+[[package]]
+name = "rocal-dev-server"
+version = "0.1.0"
 
 [[package]]
 name = "rocal-macro"

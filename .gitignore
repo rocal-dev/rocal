@@ -14,12 +14,16 @@
 /rocal/.git
 /rocal_core/.git
 /rocal_macro/.git
+/rocal_ui/.git
+/rocal_dev_server/.git
 /examples/hello_world/.git
 /examples/self_checkout/.git
 
 /rocal/.gitignore
 /rocal_core/.gitignore
 /rocal_macro/.gitignore
+/rocal_ui/.gitignore
+/rocal_dev_server/.gitignore
 /examples/hello_world/.gitignore
 /examples/self_checkout/.gitignore
 
