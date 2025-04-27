@@ -35,6 +35,17 @@ pub async fn run() {
                 ),
         )
         .subcommand(Command::new(Subcommand::Build).about("Build a Rocal app"))
+        .subcommand(
+            Command::new(Subcommand::Run)
+                .about("Run a Rocal app on your local")
+                .arg(
+                    Arg::new(RunCommandArg::Port)
+                        .short('p')
+                        .long("port")
+                        .required(false)
+                        .help("Set port where you want to serve an app")
+                )
+        )
         .subcommand(Command::new(Subcommand::Publish).about("Publish a Rocal app"))
         .subcommand(
             Command::new(Subcommand::Password)
@@ -90,6 +101,13 @@ pub async fn run() {
                     }
                     None => (),
                 }
+            } else if name == Subcommand::Run.as_str() {
+                build();
+                if let Some(port) = arg_matches.get_one::<String>(RunCommandArg::Port.as_str()) {
+                    rocal_dev_server::run(Some(&port));
+                } else {
+                    rocal_dev_server::run(None);
+                }
             }
         }
         None => (),
@@ -106,6 +124,7 @@ enum Subcommand {
     Publish,
     Password,
     SyncServers,
+    Run,
 }
 
 enum PasswordSubcommand {
@@ -118,6 +137,10 @@ enum InitCommandArg {
 
 enum SyncServersSubcommand {
     List,
+}
+
+enum RunCommandArg {
+    Port,
 }
 
 impl Into<Str> for Subcommand {
@@ -138,6 +161,7 @@ impl Subcommand {
             Subcommand::Publish => "publish",
             Subcommand::Password => "password",
             Subcommand::SyncServers => "sync-servers",
+            Subcommand::Run => "run",
         }
     }
 }
@@ -180,6 +204,20 @@ impl SyncServersSubcommand {
     pub fn as_str(self) -> &'static str {
         match self {
             SyncServersSubcommand::List => "ls",
+        }
+    }
+}
+
+impl Into<Id> for RunCommandArg {
+    fn into(self) -> Id {
+        self.as_str().into()
+    }
+}
+
+impl RunCommandArg {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            RunCommandArg::Port => "port",
         }
     }
 }
