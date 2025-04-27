@@ -3,4 +3,12 @@ name = "rocal-dev-server"
 version = "0.1.0"
 edition = "2021"
 
+authors = ["Yoshiki Sashiyama <yoshi@rocal.dev>"]
+description = "Dev server for Rocal - Full-Stack WASM framework"
+license = "MIT"
+homepage = "https://github.com/rocal-dev/rocal"
+repository = "https://github.com/rocal-dev/rocal"
+readme = "README.md"
+keywords = ["local-first", "web-framework", "wasm", "web"]
+
 [dependencies]

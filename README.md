@@ -15,7 +15,6 @@ Rocal adopts MVC(Model-View-Controller) architecture, so if you are not familiar
 
 ### Requirements
 - [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) which is used to build an Rocal application
-- (Optional) [brotli](https://github.com/google/brotli) to be used compressing releasing files to publish. See Section 6.
 
 1. Install Rocal by the command below if you haven't yet:
 
@@ -81,7 +80,7 @@ create table if not exists users (
 ```
 
 
-5. (Optional) Run to access the application:
+5. Run to access the application:
 
 ```bash
 $ cd myapp
@@ -91,6 +90,8 @@ $ rocal run
 Go to `http://127.0.0.1:3000` and you'll see the welcome message!
 
 6. (Optional) Publish a Rocal application:
+- Requirements:
+  - [brotli](https://github.com/google/brotli) to be used compressing releasing files to publish.
 - You need to subscribe Basic or Developer plan to host your app on rocal platform. Run `$ rocal subscribe` command to see more detail.
 
 ```bash
