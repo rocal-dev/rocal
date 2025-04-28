@@ -2,16 +2,51 @@
 
 ## What's Rocal?
 
-Rocal is a **local-first-web-development** a.k.a LWD driven framework that includes everything you need to make an web application by LWD such as an embedded database, router, backup server etc.
-
-Local-first web application is intended to be fully run on a web browser by itself without any server which means it can work independently even when it's offline once an application is served.
-
-That being said, you would like to back up your local data on a remote server just in case, right? 
-Rocal has sync server mechanism to synchronize your local data that is stored in your browser with a remote server whatever you want to use (but that needs to satisfy some requirements) in an easy and quick way.
+Rocal is Full-Stack WASM framework that can be used to build fast and robust web apps thanks to high performance of WebAssembly and Rust's typing system and smart memory management.
 
 Rocal adopts MVC(Model-View-Controller) architecture, so if you are not familiarized with the architecture, we highly recommend learning the architecture first before using Rocal. That's the essential part to make your application with Rocal effectively.
 
 ## Getting Started
+
+```rust
+fn run() {
+  migrate!("db/migrations");
+  
+  route! {
+    get "/hello-world" => { controller: HelloWorldController, action: index, view: HelloWorldView }
+  }
+}
+
+// ... in HelloWorldController
+impl Controller for HelloWorldController {
+  type View = UserView;
+}
+
+#[rocal::action]
+pub fn index(&self) {
+  self.view.index("Hello, World!");
+}
+
+// ... in HelloWorldView
+pub fn index(&self, message: &str) {
+  let template = HelloWorldTemplate::new(self.router.clone());
+  template.render(message);
+}
+
+// ... in HelloWorldTemplate
+fn body(&self, data: Self::Data) -> String {
+  view! {
+    <h1>{"Welcome to Rocal World!"}</h1>
+	
+    if data.is_empty() {
+      <h2>{"There is no message."}</h2>
+    } else {	
+      <h2>{{ data }}</h2>
+    }
+  }
+}
+```
+As you can see the quick example, to render HTML with MVC architecture, in this case, the router and each controller, view, and template can be written like that.
 
 ### Requirements
 - [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) which is used to build an Rocal application
@@ -30,14 +65,22 @@ $ rocal new -n myapp
 
 where `myapp` is the application name
 
-3. Change directory to `myapp` and build the application:
+3. Run to access the application:
 
 ```bash
 $ cd myapp
+$ rocal run # you can change a port where the app runs with `-p <Port>`. An app runs on 3000 by default
+```
+
+Go to `http://127.0.0.1:3000` and you'll see the welcome message!
+
+4. Build the application without running it:
+
+```bash
 $ rocal build
 ```
 
-4. See the generated directories and files:
+5. See the generated directories and files:
 
 Probably, you could find some directories and files in the application directory after executing the leading commands.
 
@@ -78,16 +121,6 @@ create table if not exists users (
   created_at datetime default current_timestamp
 );
 ```
-
-
-5. Run to access the application:
-
-```bash
-$ cd myapp
-$ rocal run
-```
-
-Go to `http://127.0.0.1:3000` and you'll see the welcome message!
 
 6. (Optional) Publish a Rocal application:
 - Requirements:
