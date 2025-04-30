@@ -14,8 +14,10 @@ pub async fn subscribe() -> Result<(), std::io::Error> {
     if let Ok(status) = get_subscription_status().await {
         println!("Your plan is {}", status.get_plan());
 
-        show_plans()?;
-        return Ok(());
+        if !status.is_free_plan() {
+            show_plans()?;
+            return Ok(());
+        }
     }
 
     println!(
