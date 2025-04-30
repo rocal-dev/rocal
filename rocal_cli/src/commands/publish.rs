@@ -16,22 +16,14 @@ use crate::{
     rocal_api_client::{create_app::CreateApp, RocalAPIClient},
 };
 
-use super::{
-    unsubscribe::get_subscription_status,
-    utils::{
-        get_user_input,
-        project::{find_project_root, get_app_name},
-        refresh_user_token::refresh_user_token,
-    },
+use super::utils::{
+    get_user_input,
+    project::{find_project_root, get_app_name},
+    refresh_user_token::refresh_user_token,
 };
 
 pub async fn publish() {
     refresh_user_token().await;
-
-    if let Err(_) = get_subscription_status().await {
-        println!("Need to subscribe a plan to publish your app. (`rocal subscribe` first.)");
-        return;
-    }
 
     let subdomain = match get_subdomain().await {
         Ok(Some(subdomain)) => subdomain,

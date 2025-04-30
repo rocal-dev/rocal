@@ -7,6 +7,10 @@ pub struct SubscriptionStatus {
 }
 
 impl SubscriptionStatus {
+    pub fn is_free_plan(&self) -> bool {
+        self.plan == "free"
+    }
+
     pub fn get_plan(&self) -> &str {
         &self.plan
     }

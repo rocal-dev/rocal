@@ -11,9 +11,16 @@ use std::io::Write;
 pub async fn unsubscribe() {
     refresh_user_token().await;
 
-    if let Ok(status) = get_subscription_status().await {
-        println!("Your plan is {}", status.get_plan());
+    let status = if let Ok(status) = get_subscription_status().await {
+        status
+    } else {
+        println!("You have not subscribed yet.");
+        return;
+    };
 
+    println!("Your plan is {}", status.get_plan());
+
+    if !status.is_free_plan() {
         if *status.get_cancel_at_period_end() {
             println!(
                 "Your subscription has been scheduled to cancel at the end of the current period."
