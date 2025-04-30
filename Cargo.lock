@@ -842,7 +842,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -982,7 +982,7 @@ dependencies = [
 
 [[package]]
 name = "rocal"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "rocal-cli",
  "rocal-core",
@@ -993,7 +993,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-cli"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "clap",
  "flate2",
