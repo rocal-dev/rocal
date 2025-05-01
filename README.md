@@ -43,15 +43,36 @@ fn body(&self, data: Self::Data) -> String {
     } else {	
       <h2>{{ data }}</h2>
     }
+	
+	<form action="/posts">
+      <input type="text" />
+      {{ &button("submit", "btn btn-primary", "Submit") }}
+	</form>
+  }
+}
+
+fn button(ty: &str, class: &str, label: &str) -> String {
+  view! {
+    <button type={{ ty }} class={{ class }}>
+      {{ label }}
+    </button>
   }
 }
 ```
 As you can see the quick example, to render HTML with MVC architecture, in this case, the router and each controller, view, and template can be written like that.
 
 ### Requirements
-- [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) which is used to build an Rocal application
-
 1. Install Rocal by the command below if you haven't yet:
+
+On MacOS or Linux
+
+```bash
+$ curl -fsSL https://www.rocal.dev/install.sh | sh
+```
+
+On Windows
+- [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) which is used to build an Rocal application
+- [brotli](https://github.com/google/brotli) to be used compressing releasing files to publish.
 
 ```bash
 $ cargo install rocal --features="cli"
@@ -123,10 +144,6 @@ create table if not exists users (
 ```
 
 6. (Optional) Publish a Rocal application:
-- Requirements:
-  - [brotli](https://github.com/google/brotli) to be used compressing releasing files to publish.
-- You need to subscribe Basic or Developer plan to host your app on rocal platform. Run `$ rocal subscribe` command to see more detail.
-
 ```bash
 $ cd myapp
 $ rocal publish
