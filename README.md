@@ -43,11 +43,11 @@ fn body(&self, data: Self::Data) -> String {
     } else {	
       <h2>{{ data }}</h2>
     }
-	
-	<form action="/posts">
+   	
+    <form action="/posts">
       <input type="text" />
       {{ &button("submit", "btn btn-primary", "Submit") }}
-	</form>
+    </form>
   }
 }
 
