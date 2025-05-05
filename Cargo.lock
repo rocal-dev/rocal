@@ -1028,7 +1028,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-dev-server"
-version = "0.1.0"
+version = "0.1.1"
 
 [[package]]
 name = "rocal-macro"
@@ -1043,7 +1043,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-ui"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "proc-macro2",
  "quote",
