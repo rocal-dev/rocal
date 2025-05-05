@@ -98,6 +98,17 @@ fn handle_connection(mut stream: TcpStream) {
                 ));
                 return;
             };
+            let resource: Vec<&str> = resource.split('?').collect();
+            let resource = if let Some(resource) = resource.get(0) {
+                resource
+            } else {
+                let res = "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n";
+                stream.write_all(res.as_bytes()).expect(&format!(
+                    "{}",
+                    Color::Red.text("[ERROR] Failed to return 400 Bad Request")
+                ));
+                return;
+            };
 
             let file_path = if 1 < resource.len() {
                 let resource = &resource[1..];

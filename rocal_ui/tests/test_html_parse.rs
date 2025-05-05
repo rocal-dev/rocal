@@ -293,4 +293,14 @@ mod tests {
         let result = parse(quote! { ??? });
         assert!(result.is_err());
     }
+
+    #[test]
+    fn fails_on_unclosed_tag() {
+        let result = parse(quote! {
+            <div>
+              <input
+            </div>
+        });
+        assert!(result.is_err());
+    }
 }

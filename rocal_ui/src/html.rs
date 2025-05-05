@@ -61,6 +61,10 @@ impl Parse for Html {
                             "Unexpected end of input in start tag",
                         ));
                     }
+
+                    if input.peek(Token![<]) {
+                        return Err(syn::Error::new(input.span(), "< shouldn't be here"));
+                    }
                 }
 
                 if input.peek(Token![/]) {
