@@ -237,7 +237,7 @@ pub fn build_action(item: TokenStream) -> TokenStream {
                         }
                     } else {
                         None
-                    }
+                    };
                 }
             } else {
                 quote! {

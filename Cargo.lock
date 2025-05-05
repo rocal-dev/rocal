@@ -1011,7 +1011,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-core"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "js-sys",
  "proc-macro2",
