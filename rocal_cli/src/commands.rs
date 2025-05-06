@@ -1,6 +1,7 @@
 pub mod build;
 pub mod init;
 pub mod login;
+pub mod migrate;
 pub mod password;
 pub mod publish;
 pub mod register;
