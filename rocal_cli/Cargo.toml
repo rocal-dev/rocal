@@ -1,6 +1,6 @@
 [package]
 name = "rocal-cli"
-version = "0.2.5"
+version = "0.2.6"
 edition = "2021"
 build = "build.rs"
 
@@ -24,6 +24,7 @@ tokio = { version = "1", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 keyring = { version = "3", features = ["apple-native", "windows-native", "linux-native"] }
 rpassword = "7.3.1"
+chrono = "0.4"
 
 [dependencies.uuid]
 version = "1.13.1"

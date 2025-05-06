@@ -1,8 +1,8 @@
 use clap::{builder::Str, command, Arg, Command, Id};
 
 use crate::commands::{
-    build::build, init::init, login::login, password, publish::publish, register::register,
-    subscribe::subscribe, sync_servers, unsubscribe::unsubscribe,
+    build::build, init::init, login::login, migrate, password, publish::publish,
+    register::register, subscribe::subscribe, sync_servers, unsubscribe::unsubscribe,
 };
 
 pub async fn run() {
@@ -59,6 +59,16 @@ pub async fn run() {
                 .arg_required_else_help(true)
                 .subcommand(Command::new(SyncServersSubcommand::List).about("List available sync servers and show app_id"))
         )
+        .subcommand(
+            Command::new(Subcommand::Migrate)
+                .about("Manage migrations")
+                .arg_required_else_help(true)
+                .subcommand(
+                    Command::new(MigrateSubcommand::Add)
+                        .about("Add a new migration file. e.g. db/migrations/<timestamp>-<name>.sql")
+                        .arg(Arg::new("name").required(true))
+                )
+        )
         .about("A tool to create and build a Rocal app.")
         .arg_required_else_help(true)
         .get_matches();
@@ -92,6 +102,18 @@ pub async fn run() {
                 }
             } else if name == Subcommand::Unsubscribe.as_str() {
                 unsubscribe().await;
+            } else if name == Subcommand::Migrate.as_str() {
+                match arg_matches.subcommand() {
+                    Some((name, arg_matches)) => {
+                        if name == MigrateSubcommand::Add.as_str() {
+                            let name = arg_matches
+                                .get_one::<String>("name")
+                                .expect("required argument");
+                            migrate::add(&name);
+                        }
+                    }
+                    None => (),
+                }
             } else if name == Subcommand::SyncServers.as_str() {
                 match arg_matches.subcommand() {
                     Some((name, _arg_matches)) => {
@@ -125,6 +147,7 @@ enum Subcommand {
     Password,
     SyncServers,
     Run,
+    Migrate,
 }
 
 enum PasswordSubcommand {
@@ -141,6 +164,10 @@ enum SyncServersSubcommand {
 
 enum RunCommandArg {
     Port,
+}
+
+enum MigrateSubcommand {
+    Add,
 }
 
 impl Into<Str> for Subcommand {
@@ -162,6 +189,7 @@ impl Subcommand {
             Subcommand::Password => "password",
             Subcommand::SyncServers => "sync-servers",
             Subcommand::Run => "run",
+            Subcommand::Migrate => "migrate",
         }
     }
 }
@@ -204,6 +232,20 @@ impl SyncServersSubcommand {
     pub fn as_str(self) -> &'static str {
         match self {
             SyncServersSubcommand::List => "ls",
+        }
+    }
+}
+
+impl Into<Str> for MigrateSubcommand {
+    fn into(self) -> Str {
+        self.as_str().into()
+    }
+}
+
+impl MigrateSubcommand {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            MigrateSubcommand::Add => "add",
         }
     }
 }
