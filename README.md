@@ -125,9 +125,17 @@ struct User {
 
 let database = crate::CONFIG.get_database().clone();
 
-let result: Result<Vec<User>, JsValue> = database.query("select id, first_name, last_name from users;").await;
+let result: Result<Vec<User>, JsValue> = database.query("select id, first_name, last_name from users;").fetch().await;
 
-database.exec("insert users (first_name, last_name) into ('John', 'Smith');").await;
+let first_name = "John";
+let last_name = "Smith";
+
+database
+  .query("insert users (first_name, last_name) into ($1, $2);")
+  .bind(first_name)
+  .bind(last_name)
+  .execute()
+  .await;
 ```
 
 And, to create tables, you are able to put SQL files in `db/migrations` directory.
