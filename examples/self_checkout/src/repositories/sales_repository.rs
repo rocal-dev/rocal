@@ -17,6 +17,7 @@ impl SalesRepository {
         let result: Vec<SalesLog> = self
             .database
             .query("select id, created_at from sales order by created_at desc;")
+            .fetch()
             .await
             .map_err(|err| err.as_string())?;
 
@@ -32,6 +33,7 @@ impl SalesRepository {
                 "#,
                 id
             ))
+            .fetch()
             .await
             .map_err(|err| err.as_string())?;
 
@@ -54,7 +56,7 @@ impl SalesRepository {
         let values = values.join(",");
 
         self.database
-            .exec(&format!(
+            .query(&format!(
                 r#"
                   begin immediate;
                     insert into sales default values;
@@ -70,6 +72,7 @@ impl SalesRepository {
                 "#,
                 values
             ))
+            .execute()
             .await
             .map_err(|err| err.as_string())?;
 

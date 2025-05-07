@@ -14,6 +14,7 @@ impl ProductRepository {
         let result: Vec<Product> = self
             .database
             .query("select id, name, price from products;")
+            .fetch()
             .await
             .map_err(|err| err.as_string())?;
 

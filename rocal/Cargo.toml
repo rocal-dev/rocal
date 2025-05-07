@@ -1,6 +1,6 @@
 [package]
 name = "rocal"
-version = "0.2.5"
+version = "0.3.0"
 edition = "2021"
 
 authors = ["Yoshiki Sashiyama <yoshi@rocal.dev>"]
@@ -12,9 +12,9 @@ readme = "README.md"
 keywords = ["local-first", "web-framework", "macro", "wasm", "web"]
 
 [dependencies]
-rocal-macro = "0.2"
-rocal-core = "0.2"
-rocal-cli = { version = "0.2", optional = true }
+rocal-macro = "0.3"
+rocal-core = "0.3"
+rocal-cli = { version = "0.3", optional = true }
 rocal-ui = "0.1"
 tokio = { version = "1", features = ["full"], optional = true }
 

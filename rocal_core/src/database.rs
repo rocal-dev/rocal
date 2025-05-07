@@ -33,20 +33,49 @@ pub fn build_database_struct() -> TokenStream {
                 format!("{}/{}", self.directory_name, self.file_name)
             }
 
-            pub async fn exec(&self, query: &str) -> Result<JsValue, JsValue> {
-                let promise = crate::exec_sql(&self.get_name(), query).dyn_into::<Promise>()?;
-                let result = wasm_bindgen_futures::JsFuture::from(promise).await?;
-                Ok(result)
+            pub fn query(&self, query: &str) -> Query {
+                Query::new(&self.get_name(), query)
+            }
+        }
+
+        struct Query {
+            db: String,
+            query: String,
+            bindings: Vec<JsValue>,
+        }
+
+        impl Query {
+            fn new(db: &str, query: &str) -> Self {
+                Self {
+                    db: db.to_string(),
+                    query: query.to_string(),
+                    bindings: vec![],
+                }
             }
 
-            pub async fn query<T>(&self, query: &str) -> Result<Vec<T>, JsValue>
+            fn bind<T>(&mut self, bind: T) -> &mut Self
+            where
+                T: Into<JsValue>,
+            {
+                self.bindings.push(bind.into());
+                self
+            }
+
+            pub async fn fetch<T>(&self) -> Result<Vec<T>, JsValue>
             where
                 T: DeserializeOwned,
             {
-                let promise = crate::exec_sql(&self.get_name(), query).dyn_into::<Promise>()?;
+                let promise = crate::exec_sql(&self.db, &self.query, self.bindings.clone().into_boxed_slice())
+                    .dyn_into::<Promise>()?;
                 let result = wasm_bindgen_futures::JsFuture::from(promise).await?;
-
                 let result: Vec<T> = from_value(result)?;
+                Ok(result)
+            }
+
+            pub async fn execute(&self) -> Result<JsValue, JsValue> {
+                let promise = crate::exec_sql(&self.db, &self.query, self.bindings.clone().into_boxed_slice())
+                    .dyn_into::<Promise>()?;
+                let result = wasm_bindgen_futures::JsFuture::from(promise).await?;
                 Ok(result)
             }
         }

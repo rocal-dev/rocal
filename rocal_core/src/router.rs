@@ -2,6 +2,8 @@ use std::{collections::HashMap, future::Future, pin::Pin};
 
 use regex::Regex;
 use url::Url;
+use wasm_bindgen::JsValue;
+use web_sys::{console, window};
 
 use crate::enums::request_method::RequestMethod;
 
@@ -111,5 +113,43 @@ impl Router {
         } else {
             false
         }
+    }
+
+    pub async fn redirect(&self, path: &str) -> bool {
+        let result = self.resolve(RequestMethod::Get, path, None).await;
+
+        if !result {
+            return false;
+        }
+
+        let win = if let Some(win) = window() {
+            win
+        } else {
+            return false;
+        };
+
+        let (history, origin) =
+            if let (Ok(history), Ok(origin)) = (win.history(), win.location().origin()) {
+                (history, origin)
+            } else {
+                return false;
+            };
+
+        let abs = format!("{}/#{}", origin, path);
+
+        if let Err(err) = history.push_state_with_url(&JsValue::NULL, "", Some(&abs)) {
+            console::error_1(&err);
+            return false;
+        }
+
+        true
+    }
+}
+
+pub fn link_to(path: &str, remote: bool) -> String {
+    if remote {
+        format!("{}", path)
+    } else {
+        format!("/#{}", path)
     }
 }

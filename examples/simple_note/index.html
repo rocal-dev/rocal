@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>simple_note</title>
+    <link rel="icon" type="image/x-icon" href="./public/favicon.ico">    
+    <script src="./public/twind.js"></script>
+</head>
+<body>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+          if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.register('./sw.js');
+          }
+      });
+    </script>
+    <script src="./js/global.js"></script>
+    <script type="module">
+      import init from './pkg/simple_note.js';
+
+      async function main() {
+          const wasm = await init();
+      }
+
+      main();
+    </script>
+</body>
+</html>

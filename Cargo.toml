@@ -8,7 +8,8 @@ members = [
   "rocal_ui",
   "rocal_dev_server",
   "examples/hello_world",
-  "examples/self_checkout"
+  "examples/self_checkout",
+  "examples/simple_note"
 ]
 
 [patch.crates-io]

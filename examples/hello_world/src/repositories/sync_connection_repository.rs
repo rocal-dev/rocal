@@ -17,6 +17,7 @@ impl SyncConnectionRepository {
         let mut result: Vec<SyncConnection> = self
             .database
             .query("select id from sync_connections limit 1;")
+            .fetch()
             .await?;
 
         match result.pop() {
@@ -28,10 +29,11 @@ impl SyncConnectionRepository {
     pub async fn create(&self, id: &str, password: &str) -> Result<(), JsValue> {
         match self
             .database
-            .exec(&format!(
+            .query(&format!(
                 "insert into sync_connections (id, password) values ('{}', '{}')",
                 id, password
             ))
+            .execute()
             .await
         {
             Ok(_) => Ok(()),

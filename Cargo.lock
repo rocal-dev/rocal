@@ -1044,7 +1044,7 @@ dependencies = [
 
 [[package]]
 name = "rocal"
-version = "0.2.5"
+version = "0.3.0"
 dependencies = [
  "rocal-cli",
  "rocal-core",
@@ -1055,7 +1055,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-cli"
-version = "0.2.6"
+version = "0.3.0"
 dependencies = [
  "chrono",
  "clap",
@@ -1074,7 +1074,7 @@ dependencies = [
 
 [[package]]
 name = "rocal-core"
-version = "0.2.3"
+version = "0.3.0"
 dependencies = [
  "js-sys",
  "proc-macro2",
@@ -1095,7 +1095,7 @@ version = "0.1.1"
 
 [[package]]
 name = "rocal-macro"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1337,6 +1337,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a9e9e0b4211b72e7b8b6e85c807d36c212bdb33ea8587f7569562a84df5465b1"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "simple_note"
+version = "0.1.0"
+dependencies = [
+ "js-sys",
+ "rocal",
+ "serde",
+ "serde-wasm-bindgen",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]
