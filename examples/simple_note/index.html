@@ -2,11 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>simple_note</title>
+    <title>Simple Note</title>
     <link rel="icon" type="image/x-icon" href="./public/favicon.ico">    
     <script src="./public/twind.js"></script>
 </head>
 <body>
+    <div class="w-screen h-screen flex justify-center">
+      <p class="m-auto text-5xl font-semibold">
+	<span class="animate-pulse">Simple Note...</span>
+      </p>
+    </div>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
           if ('serviceWorker' in navigator) {
