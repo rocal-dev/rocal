@@ -38,7 +38,7 @@ pub fn start_app(item: TokenStream) -> TokenStream {
         #[wasm_bindgen]
         extern "C" {
             #[wasm_bindgen(js_name = execSQL)]
-            fn exec_sql(db: &str, quer: &str) -> JsValue;
+            fn exec_sql(db: &str, query: &str, bindings: Box<[JsValue]>) -> JsValue;
         }
 
         #[wasm_bindgen(start)]
@@ -270,7 +270,7 @@ pub fn run_migration(item: TokenStream) -> TokenStream {
 
     if !query.is_empty() {
         quote! {
-            match CONFIG.get_database().exec(#query).await {
+            match CONFIG.get_database().query(#query).execute().await {
                 Ok(_) => (),
                 Err(err) => web_sys::console::error_1(&err),
             }

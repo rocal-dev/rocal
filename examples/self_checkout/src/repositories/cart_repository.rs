@@ -25,6 +25,7 @@ impl CartRepository {
                inner join products as p on c.product_id = p.id;
             "#,
             )
+            .fetch()
             .await
             .map_err(|err| err.as_string())?;
 
@@ -47,6 +48,7 @@ impl CartRepository {
                where p.id = {} limit 1;"#,
                 product_id
             ))
+            .fetch()
             .await
             .map_err(|err| err.as_string())?;
 
@@ -54,20 +56,22 @@ impl CartRepository {
             Some(item) => {
                 let number_of_items = item.get_number_of_items() + 1;
                 self.database
-                    .exec(&format!(
+                    .query(&format!(
                         "update cart_items set number_of_items = {} where product_id = {}",
                         number_of_items, product_id
                     ))
+                    .execute()
                     .await
                     .map_err(|err| err.as_string())?;
             }
             None => {
                 let number_of_items = 1;
                 self.database
-                    .exec(&format!(
+                    .query(&format!(
                         "insert into cart_items (product_id, number_of_items) values ({}, {})",
                         product_id, number_of_items
                     ))
+                    .execute()
                     .await
                     .map_err(|err| err.as_string())?;
             }
@@ -78,10 +82,11 @@ impl CartRepository {
 
     pub async fn remove_item(&self, product_id: u32) -> Result<(), Option<String>> {
         self.database
-            .exec(&format!(
+            .query(&format!(
                 "delete from cart_items where product_id = {}",
                 product_id
             ))
+            .execute()
             .await
             .map_err(|err| err.as_string())?;
 
@@ -90,7 +95,8 @@ impl CartRepository {
 
     pub async fn remove_all_items(&self) -> Result<(), Option<String>> {
         self.database
-            .exec("delete from cart_items;")
+            .query("delete from cart_items;")
+            .execute()
             .await
             .map_err(|err| err.as_string())?;
 
