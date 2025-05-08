@@ -78,4 +78,24 @@ impl NotesController {
             }
         };
     }
+
+    #[rocal::action]
+    pub fn delete(&self, note_id: i64) {
+        let db = CONFIG.get_database().clone();
+
+        let result = db
+            .query("delete from notes where id = $1;")
+            .bind(note_id)
+            .execute()
+            .await;
+
+        match result {
+            Ok(_) => {
+                self.router.borrow().redirect("/").await;
+            }
+            Err(err) => {
+                console::error_1(&err);
+            }
+        };
+    }
 }

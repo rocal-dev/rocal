@@ -22,6 +22,7 @@ fn app() {
     route! {
         get "/" => { controller: RootController, action: index, view: RootView },
         post "/notes" => { controller: NotesController, action: create, view: NotesView },
-        patch "/notes/<note_id>" => { controller: NotesController, action: update, view: NotesView }
+        patch "/notes/<note_id>" => { controller: NotesController, action: update, view: NotesView },
+        delete "/notes/<note_id>" => { controller: NotesController, action: delete, view: NotesView }
     }
 }

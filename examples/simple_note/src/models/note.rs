@@ -9,7 +9,15 @@ pub struct Note {
 
 impl Note {
     pub fn get_title(&self) -> &Option<String> {
-        &self.title
+        if let Some(title) = &self.title {
+            if title.is_empty() {
+                &None
+            } else {
+                &self.title
+            }
+        } else {
+            &self.title
+        }
     }
 
     pub fn get_body(&self) -> &Option<String> {

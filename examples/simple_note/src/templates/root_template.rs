@@ -21,9 +21,10 @@ impl Template for RootTemplate {
 
     fn body(&self, data: Self::Data) -> String {
         view! {
-            <div class="f-screen">
+            <div class="w-screen h-screen">
                 <header class="flex justify-start drop-shadow-md">
                   <h1 class="m-4 font-semibold text-xl">{"Simple Note"}</h1>
+                  <h2 class="mt-5">{"powered by"}<a href="https://github.com/rocal-dev/rocal" target="_blank" class="text-sky-600">{"Rocal"}</a></h2>
                 </header>
                 <div class="m-6 grid grid-cols-6 gap-4">
                   <div class="col-span-1">
@@ -52,18 +53,20 @@ impl Template for RootTemplate {
                         } else {
                           <input type="text" name="title" placeholder="Title" class="border-none text-5xl appearance-none w-full py-4 px-3 text-gray-700 leading-tight outline-none" />
                         }
-                        <textarea name="body" class="border-none text-4xl appearance-none w-full h-[720px] py-4 px-3 text-gray-700 leading-tight outline-none" placeholder="Type something...">
+                        <textarea name="body" class="border-none text-4xl appearance-none w-full h-[60vh] py-4 px-3 text-gray-700 leading-tight outline-none" placeholder="Type something...">
                           if let Some(body) = note.get_body() {
                               {{ body }}
                           }
                         </textarea>
                         <button type="submit" class="underline p-3 mt-3 text-xl text-gray-800">{"Save changes"}</button>
                       </form>
-                      <button type="submit" class="underline p-3 mt-3 text-xl text-red-700">{"Delete"}</button>
+                      <form action={{ &format!("/notes/{}", &note.id) }} method="delete">
+                        <button type="submit" class="underline p-3 mt-1 text-xl text-red-700">{"Delete"}</button>
+                      </form>
                     } else {
                       <form action="/notes" method="post">
                         <input type="text" name="title" placeholder="Title" class="border-none text-5xl appearance-none w-full py-4 px-3 text-gray-700 leading-tight outline-none" />
-                        <textarea name="body" class="border-none text-4xl appearance-none w-full h-[720px] py-4 px-3 text-gray-700 leading-tight outline-none" placeholder="Type something..."></textarea>
+                        <textarea name="body" class="border-none text-4xl h-[60vh] appearance-none w-full py-4 px-3 text-gray-700 leading-tight outline-none" placeholder="Type something..."></textarea>
                         <button type="submit" class="underline p-3 mt-3 text-xl text-gray-800">{"Save changes"}</button>
                       </form>
                     }
