@@ -1,8 +1,10 @@
 #![doc = include_str!("../README.md")]
 
 use proc_macro::TokenStream;
-use rocal_core::{build_action, build_config, build_route, run_migration, start_app};
 use rocal_ui::build_ui;
+
+#[cfg(feature = "full")]
+use rocal_core::{build_action, build_config, build_route, run_migration, start_app};
 
 /// This attribute macro should be used when you create an entrypoint of a Rocal application.
 ///
