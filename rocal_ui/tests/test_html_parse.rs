@@ -286,6 +286,14 @@ mod tests {
         assert!(matches!(div.children().get(0).unwrap().value(), Lex::If(_)));
     }
 
+    #[test]
+    fn can_parse_doctype() {
+        let result = parse(quote! {
+            <!DOCTYPE html>
+        });
+        assert!(result.is_ok());
+    }
+
     // ---------- failure cases ----------
 
     #[test]
