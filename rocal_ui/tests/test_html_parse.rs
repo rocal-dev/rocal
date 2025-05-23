@@ -294,6 +294,14 @@ mod tests {
         assert!(result.is_ok());
     }
 
+    #[test]
+    fn parse_attributes_including_hyphen_separeted_keys() {
+        let result = parse(quote! {
+            <meta http-equiv="X-UA-Compatible">
+        });
+        assert!(result.is_ok());
+    }
+
     // ---------- failure cases ----------
 
     #[test]
