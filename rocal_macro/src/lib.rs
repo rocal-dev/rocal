@@ -13,6 +13,7 @@ use rocal_ui::build_ui;
 /// fn app() {}
 /// ```
 ///
+#[cfg(feature = "full")]
 #[proc_macro_attribute]
 pub fn main(_: TokenStream, item: TokenStream) -> TokenStream {
     start_app(item.into()).into()
@@ -44,6 +45,7 @@ pub fn main(_: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
+#[cfg(feature = "full")]
 #[proc_macro_attribute]
 pub fn action(_: TokenStream, item: TokenStream) -> TokenStream {
     build_action(item.into()).into()
@@ -58,6 +60,7 @@ pub fn action(_: TokenStream, item: TokenStream) -> TokenStream {
 /// }
 ///
 /// ```
+#[cfg(feature = "full")]
 #[proc_macro]
 pub fn route(item: TokenStream) -> TokenStream {
     build_route(item.into()).into()
@@ -73,6 +76,7 @@ pub fn route(item: TokenStream) -> TokenStream {
 ///     database_file_name: "local.sqlite3"
 /// }
 /// ```
+#[cfg(feature = "full")]
 #[proc_macro]
 pub fn config(item: TokenStream) -> TokenStream {
     build_config(item.into()).into()
@@ -83,6 +87,7 @@ pub fn config(item: TokenStream) -> TokenStream {
 /// ```rust
 /// migrate!("db/migrations");
 /// ```
+#[cfg(feature = "full")]
 #[proc_macro]
 pub fn migrate(item: TokenStream) -> TokenStream {
     run_migration(item.into()).into()
@@ -105,6 +110,7 @@ pub fn migrate(item: TokenStream) -> TokenStream {
 ///   </div>
 /// }
 /// ```
+#[cfg(any(feature = "full", feature = "ui"))]
 #[proc_macro]
 pub fn view(item: TokenStream) -> TokenStream {
     build_ui(item.into()).into()
