@@ -420,7 +420,15 @@ impl Parse for Attribute {
     fn parse(input: ParseStream) -> Result<Self> {
         let key = if input.peek(Ident) {
             let key: Ident = input.parse()?;
-            key.to_string()
+            let mut key = key.to_string();
+
+            while input.peek(Token![-]) {
+                input.parse::<Token![-]>()?;
+                key += "-";
+                key += &input.parse::<Ident>()?.to_string();
+            }
+
+            key
         } else if input.peek(Token![type]) {
             input.parse::<Token![type]>()?;
             "type".to_string()
