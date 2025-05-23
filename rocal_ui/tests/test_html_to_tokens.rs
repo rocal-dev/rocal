@@ -130,4 +130,11 @@ mod tests {
         assert!(out.contains("li"));
         assert!(out.contains("</li>"));
     }
+
+    #[test]
+    fn doc_type_declaration() {
+        let out = gen(quote! { <!DOCTYPE html> });
+
+        assert!(out.contains("<!DOCTYPE html>"));
+    }
 }

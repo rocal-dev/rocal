@@ -255,6 +255,36 @@ impl Parse for Html {
                         "`for-in` should be used inside of a node",
                     ));
                 }
+            } else if input.peek(Token![<]) && input.peek2(Token![!]) && input.peek3(Ident) {
+                input.parse::<Token![<]>()?;
+                input.parse::<Token![!]>()?;
+
+                let ident: Ident = input.parse()?;
+                let doc_type: Ident = input.parse()?;
+
+                if ident.to_string().to_uppercase() != "DOCTYPE"
+                    || doc_type.to_string().to_lowercase() != "html"
+                {
+                    return Err(syn::Error::new(
+                        input.span(),
+                        "`DOCTYPE html` is expected following by `!`",
+                    ));
+                }
+
+                input.parse::<Token![>]>()?;
+
+                if let Some(mut previous) = stack.pop() {
+                    previous.children.push(Html {
+                        children: vec![],
+                        value: Lex::DocType,
+                    });
+                    stack.push(previous);
+                } else {
+                    return Err(syn::Error::new(
+                        input.span(),
+                        "A single root is mandatory. DOCTYPE cannot be a parent node.",
+                    ));
+                }
             } else {
                 return Err(syn::Error::new(input.span(), "Invalid token"));
             }
@@ -365,6 +395,7 @@ pub enum Lex {
         element: HtmlElement,
         attributes: Vec<Attribute>,
     },
+    DocType,
     Text(String),
     Var(String),
     If(String),

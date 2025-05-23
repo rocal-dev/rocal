@@ -73,7 +73,7 @@ impl Html {
                     }
 
                     if *element != HtmlElement::Fragment {
-                        let tag = format!("</{}>\n", &element);
+                        let tag = format!("\n</{}>\n", &element);
                         out.push(quote! {
                             html.push_str(#tag);
                         });
@@ -129,6 +129,11 @@ impl Html {
                     for #var in #iter {
                         #(#children)*
                     }
+                });
+            }
+            Lex::DocType => {
+                out.push(quote! {
+                    html.push_str("<!DOCTYPE html>\n");
                 });
             }
         }
