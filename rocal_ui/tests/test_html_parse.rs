@@ -60,8 +60,9 @@ mod tests {
                 .iter()
                 .map(|attr| {
                     let value = match attr.value() {
-                        AttributeValue::Text(text) => text,
-                        AttributeValue::Var(var) => &var.to_token_stream().to_string(),
+                        Some(AttributeValue::Text(text)) => text,
+                        Some(AttributeValue::Var(var)) => &var.to_token_stream().to_string(),
+                        None => "",
                     };
                     (attr.key(), value.to_string())
                 })
@@ -84,8 +85,9 @@ mod tests {
                 .iter()
                 .map(|attr| {
                     let value = match attr.value() {
-                        AttributeValue::Text(text) => text,
-                        AttributeValue::Var(var) => &var.to_token_stream().to_string(),
+                        Some(AttributeValue::Text(text)) => text,
+                        Some(AttributeValue::Var(var)) => &var.to_token_stream().to_string(),
+                        None => "",
                     };
                     (attr.key(), value.to_string())
                 })
@@ -298,6 +300,14 @@ mod tests {
     fn parse_attributes_including_hyphen_separeted_keys() {
         let result = parse(quote! {
             <meta http-equiv="X-UA-Compatible">
+        });
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn parse_async_and_defer_in_script_tag() {
+        let result = parse(quote! {
+            <script src="https://accounts.google.com/gsi/client" async defer></script>
         });
         assert!(result.is_ok());
     }

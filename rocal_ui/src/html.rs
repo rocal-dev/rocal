@@ -50,7 +50,7 @@ impl Parse for Html {
                 let mut attrs: Vec<Attribute> = vec![];
 
                 while !(input.peek(Token![>]) || input.peek(Token![/])) {
-                    if input.peek(Ident) || input.peek(Token![type]) {
+                    if input.peek(Ident) || input.peek(Token![type]) || input.peek(Token![async]) {
                         let attr: Attribute = input.parse()?;
                         attrs.push(attr);
                     }
@@ -408,7 +408,7 @@ pub enum Lex {
 }
 
 #[derive(Debug, Clone)]
-pub struct Attribute(String, AttributeValue);
+pub struct Attribute(String, Option<AttributeValue>);
 
 #[derive(Debug, Clone)]
 pub enum AttributeValue {
@@ -429,6 +429,9 @@ impl Parse for Attribute {
             }
 
             key
+        } else if input.peek(Token![async]) {
+            input.parse::<Token![async]>()?;
+            "async".to_string()
         } else if input.peek(Token![type]) {
             input.parse::<Token![type]>()?;
             "type".to_string()
@@ -439,18 +442,22 @@ impl Parse for Attribute {
             ));
         };
 
-        input.parse::<Token![=]>()?;
+        if input.peek(Token![=]) {
+            input.parse::<Token![=]>()?;
 
-        if input.peek(Brace) {
-            let mut value;
-            braced!(value in input);
-            braced!(value in value);
-            let value: Expr = value.parse()?;
-            return Ok(Attribute(key, AttributeValue::Var(value)));
+            if input.peek(Brace) {
+                let mut value;
+                braced!(value in input);
+                braced!(value in value);
+                let value: Expr = value.parse()?;
+                return Ok(Attribute(key, Some(AttributeValue::Var(value))));
+            }
+
+            let value: LitStr = input.parse()?;
+            return Ok(Attribute(key, Some(AttributeValue::Text(value.value()))));
+        } else {
+            Ok(Attribute(key, None))
         }
-
-        let value: LitStr = input.parse()?;
-        return Ok(Attribute(key, AttributeValue::Text(value.value())));
     }
 }
 
@@ -458,7 +465,7 @@ impl Attribute {
     pub fn key(&self) -> &str {
         &self.0
     }
-    pub fn value(&self) -> &AttributeValue {
+    pub fn value(&self) -> &Option<AttributeValue> {
         &self.1
     }
 }
