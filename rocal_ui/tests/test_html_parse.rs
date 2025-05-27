@@ -312,6 +312,15 @@ mod tests {
         assert!(result.is_ok());
     }
 
+    #[test]
+    fn parse_attribute_including_type_following_by_dash() {
+        let result = parse(quote! {
+            <div data-type="type"></div>
+        });
+        eprintln!("{:#?}", result);
+        assert!(result.is_ok());
+    }
+
     // ---------- failure cases ----------
 
     #[test]

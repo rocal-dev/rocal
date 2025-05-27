@@ -425,7 +425,18 @@ impl Parse for Attribute {
             while input.peek(Token![-]) {
                 input.parse::<Token![-]>()?;
                 key += "-";
-                key += &input.parse::<Ident>()?.to_string();
+
+                if input.peek(Ident) {
+                    key += &input.parse::<Ident>()?.to_string();
+                } else if input.peek(Token![async]) {
+                    input.parse::<Token![async]>()?;
+                    key += "async";
+                } else if input.peek(Token![type]) {
+                    input.parse::<Token![type]>()?;
+                    key += "type"
+                } else {
+                    return Err(syn::Error::new(input.span(), "Cannot be used as attribute"));
+                }
             }
 
             key

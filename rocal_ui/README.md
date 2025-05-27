@@ -77,6 +77,14 @@ On top of that, so `{{ variable }}` can take any expression that emits `&str` of
 
 ## How to install
 
+```rust
+// Cargo.toml
+rocal-macro = { version = [LATEST_VERSION], default-features = false, features = ["ui"] }
+```
+
+OR
+
+
 (if you have not had `cargo` yet, follow [this link](https://doc.rust-lang.org/cargo/getting-started/installation.html) first)
 ```bash
 $ cargo install rocal --features="cli"
