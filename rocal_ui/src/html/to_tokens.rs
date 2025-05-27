@@ -48,17 +48,20 @@ impl Html {
                         let key = attr.key();
 
                         match attr.value() {
-                            AttributeValue::Text(text) => {
+                            Some(AttributeValue::Text(text)) => {
                                 let text = Literal::string(&text);
                                 out.push(quote! {
                                     write!(html, r#" {}="{}""#, #key, #text).unwrap();
                                 });
                             }
-                            AttributeValue::Var(var) => {
+                            Some(AttributeValue::Var(var)) => {
                                 out.push(quote! {
                                     write!(html, r#" {}="{}""#, #key, #var).unwrap();
                                 });
                             }
+                            None => out.push(quote! {
+                                write!(html, " {}", #key).unwrap();
+                            }),
                         };
                     }
 

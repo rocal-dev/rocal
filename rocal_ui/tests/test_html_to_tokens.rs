@@ -137,4 +137,14 @@ mod tests {
 
         assert!(out.contains("<!DOCTYPE html>"));
     }
+
+    #[test]
+    fn async_and_defer_in_script_tag() {
+        let out = gen(
+            quote! { <script src="https://accounts.google.com/gsi/client" async defer></script> },
+        );
+
+        assert!(out.contains("async"));
+        assert!(out.contains("defer"));
+    }
 }
