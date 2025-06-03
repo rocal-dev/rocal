@@ -320,6 +320,16 @@ mod tests {
         assert!(result.is_ok());
     }
 
+    #[test]
+    fn parse_label() {
+        let result = parse(quote! {
+          <label for="label" class="block text-sm font-medium text-gray-700">
+            {"Label"}
+          </label>
+        });
+        assert!(result.is_ok());
+    }
+
     // ---------- failure cases ----------
 
     #[test]

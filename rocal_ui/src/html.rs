@@ -50,7 +50,11 @@ impl Parse for Html {
                 let mut attrs: Vec<Attribute> = vec![];
 
                 while !(input.peek(Token![>]) || input.peek(Token![/])) {
-                    if input.peek(Ident) || input.peek(Token![type]) || input.peek(Token![async]) {
+                    if input.peek(Ident)
+                        || input.peek(Token![type])
+                        || input.peek(Token![async])
+                        || input.peek(Token![for])
+                    {
                         let attr: Attribute = input.parse()?;
                         attrs.push(attr);
                     }
@@ -431,7 +435,10 @@ impl Parse for Attribute {
                     key += "async";
                 } else if input.peek(Token![type]) {
                     input.parse::<Token![type]>()?;
-                    key += "type"
+                    key += "type";
+                } else if input.peek(Token![for]) {
+                    input.parse::<Token![for]>()?;
+                    key += "for";
                 } else {
                     return Err(syn::Error::new(input.span(), "Cannot be used as attribute"));
                 }
@@ -444,6 +451,9 @@ impl Parse for Attribute {
         } else if input.peek(Token![type]) {
             input.parse::<Token![type]>()?;
             "type".to_string()
+        } else if input.peek(Token![for]) {
+            input.parse::<Token![for]>()?;
+            "for".to_string()
         } else {
             return Err(syn::Error::new(
                 input.span(),
