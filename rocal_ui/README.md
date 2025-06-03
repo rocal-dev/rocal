@@ -9,14 +9,14 @@ Let's begin with syntax of Rocal UI. Here is a simple example including variable
 ```rust ,ignore
 view! {
   <div class="container">
-    <h1 class="title">{{ title }}</h1>
+    <h1 class="title">{ title }</h1>
 
     if user.id <= 10 {
       <p>{ "You are an early user!" }</p>
-      <a href={{ reward_url }}>{ "Click here to get rewards!" }</a>
+      <a href={ reward_url }>{ "Click here to get rewards!" }</a>
     } else if user.id <= 20 {
       <p>{ "You are kind of an early user." }</p>
-      <a href={{ sort_of_reward_url }}>{ "Check it out for your reward." }</a>
+      <a href={ sort_of_reward_url }>{ "Check it out for your reward." }</a>
     } else {
       <p>{ "You are a regular user." }</p>
     }
@@ -25,7 +25,7 @@ view! {
     
     <ul>
       for article in articles {
-        <li><a href={{ article.url }}>{{ article.title }}</a></li>
+        <li><a href={ article.url }>{ article.title }</a></li>
       }
     </ul>
   </div>
@@ -33,8 +33,8 @@ view! {
 ```
 
 It's straight forward, isn't it?
-
-- `{{ variable }}` : as you saw the code above, you can use any variable with it
+- `{ variable }`: You can set a variable that returns `&str` and it will be sanitized HTML safe.
+- `{{ variable }}` : You can set a variable that returns `&str` but it will NOT sanitized HTML safe. So maybe you could use it to embed a safe HTML.
 - `if-else` : you can utilize `if-else` even `else-if` as below
 ```rust ,ignore
 if user.id <= 10 {
@@ -53,7 +53,6 @@ for article in articles {
   <li><a href={{ article.url }}>{{ article.title }}</a></li>
 }
 ```
-- `{ "string" }`: This is sort of shorthand of variable embedding for only string. You can use it with regular string, exactly, `&str` in Rust context
 
 ## Advanced use
 `view! {}` produces HTML string technically, so you can embed view! in another view! like using it as a partial template.
@@ -77,7 +76,7 @@ On top of that, so `{{ variable }}` can take any expression that emits `&str` of
 
 ## How to install
 
-```rust
+```toml
 // Cargo.toml
 rocal-macro = { version = [LATEST_VERSION], default-features = false, features = ["ui"] }
 ```

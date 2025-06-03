@@ -127,7 +127,7 @@ mod tests {
 
         matches!(
             html.children().get(0).unwrap().value(),
-            Lex::Text(ref s) if s == "Hello"
+            Lex::SanitizedVar(ref s) if s == "Hello"
         );
         matches!(html.children().get(1).unwrap().value(), Lex::Var(_));
     }
@@ -317,7 +317,6 @@ mod tests {
         let result = parse(quote! {
             <div data-type="type"></div>
         });
-        eprintln!("{:#?}", result);
         assert!(result.is_ok());
     }
 
