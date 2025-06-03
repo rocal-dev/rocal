@@ -17,6 +17,24 @@ impl ToTokens for Html {
         quote! {
             {
                 use std::fmt::Write;
+
+                let html_escape = |input: &str| -> String {
+                    let mut output = String::with_capacity(input.len());
+
+                    for c in input.chars() {
+                        match c {
+                            '&' => output.push_str("&amp;"),
+                            '"' => output.push_str("&quot;"),
+                            '\'' => output.push_str("&#39;"),
+                            '>' => output.push_str("&gt;"),
+                            '<' => output.push_str("&lt;"),
+                            _ => output.push(c),
+                        }
+                    }
+
+                    output
+                };
+
                 let mut html = String::new();
                 #(#stmts)*
                 html
@@ -83,9 +101,12 @@ impl Html {
                     }
                 }
             }
-            Lex::Text(text) => {
+            Lex::SanitizedVar(var) => {
+                let var: Expr =
+                    parse_str(var).expect(&format!("Cannot parse the variable: {}", &var));
+
                 out.push(quote! {
-                    html += #text;
+                    html.push_str(&html_escape(#var));
                 });
             }
             Lex::Var(var) => {

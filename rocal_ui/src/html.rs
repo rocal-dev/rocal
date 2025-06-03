@@ -128,15 +128,13 @@ impl Parse for Html {
                 braced!(content in input);
 
                 if !content.peek(Brace) {
-                    let text: LitStr = content.parse()?;
-
-                    let text = Html {
-                        children: vec![],
-                        value: Lex::Text(text.value()),
-                    };
+                    let sanitized_var = Self::extract_variable(&content)?;
 
                     if let Some(mut parent) = stack.pop() {
-                        parent.children.push(text);
+                        parent.children.push(Html {
+                            children: vec![],
+                            value: Lex::SanitizedVar(sanitized_var),
+                        });
                         stack.push(parent);
                     } else {
                         return Err(syn::Error::new(input.span(), "A single root is mandatory"));
@@ -396,7 +394,7 @@ pub enum Lex {
         attributes: Vec<Attribute>,
     },
     DocType,
-    Text(String),
+    SanitizedVar(String),
     Var(String),
     If(String),
     ElseIf(String),
