@@ -84,7 +84,7 @@ impl Html {
                     }
 
                     out.push(quote! {
-                        html.push_str(">\n");
+                        html.push_str(">");
                     });
                 }
 
@@ -94,7 +94,7 @@ impl Html {
                     }
 
                     if *element != HtmlElement::Fragment {
-                        let tag = format!("\n</{}>\n", &element);
+                        let tag = format!("</{}>\n", &element);
                         out.push(quote! {
                             html.push_str(#tag);
                         });
