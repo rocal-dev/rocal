@@ -330,6 +330,16 @@ mod tests {
         assert!(result.is_ok());
     }
 
+    #[test]
+    fn parse_svg() {
+        let result = parse(quote! {
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+        });
+        assert!(result.is_ok());
+    }
+
     // ---------- failure cases ----------
 
     #[test]

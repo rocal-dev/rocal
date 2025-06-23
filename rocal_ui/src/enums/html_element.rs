@@ -87,6 +87,7 @@ pub enum HtmlElement {
     Picture,
     Source,
     Svg,
+    Path,
     Math,
     Canvas,
     Noscript,
@@ -127,7 +128,7 @@ pub enum HtmlElement {
 }
 
 impl HtmlElement {
-    const VOID_ELEMENTS: [HtmlElement; 13] = [
+    const VOID_ELEMENTS: [HtmlElement; 14] = [
         HtmlElement::Area,
         HtmlElement::Base,
         HtmlElement::Br,
@@ -141,6 +142,7 @@ impl HtmlElement {
         HtmlElement::Source,
         HtmlElement::Track,
         HtmlElement::Wbr,
+        HtmlElement::Path,
     ];
 
     #[allow(dead_code)]
@@ -250,6 +252,7 @@ impl fmt::Display for HtmlElement {
             HtmlElement::Picture => "picture",
             HtmlElement::Source => "source",
             HtmlElement::Svg => "svg",
+            HtmlElement::Path => "path",
             HtmlElement::Math => "math",
             HtmlElement::Canvas => "canvas",
             HtmlElement::Noscript => "noscript",
@@ -377,6 +380,7 @@ impl HtmlElement {
             "picture" => Some(Picture),
             "source" => Some(Source),
             "svg" => Some(Svg),
+            "path" => Some(Path),
             "math" => Some(Math),
             "canvas" => Some(Canvas),
             "noscript" => Some(Noscript),
