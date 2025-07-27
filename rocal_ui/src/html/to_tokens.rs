@@ -83,9 +83,15 @@ impl Html {
                         };
                     }
 
-                    out.push(quote! {
-                        html.push_str(">");
-                    });
+                    if element.is_void() {
+                        out.push(quote! {
+                            html.push_str(" />");
+                        });
+                    } else {
+                        out.push(quote! {
+                            html.push_str(">");
+                        });
+                    }
                 }
 
                 if !element.is_void() {
